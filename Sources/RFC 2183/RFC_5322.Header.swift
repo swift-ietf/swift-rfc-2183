@@ -14,7 +14,7 @@ extension RFC_5322.Header {
     /// - Throws: RFC_5322.Header.Value.Error if the value is invalid
     public init(
         _ contentDisposition: RFC_2183.ContentDisposition
-    ) throws {
+    ) throws(Value.Error) {
         try self.init(name: .contentDisposition, value: .init(String(contentDisposition)))
     }
 }
