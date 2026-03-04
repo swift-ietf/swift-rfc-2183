@@ -1,5 +1,5 @@
 //
-//  RFC_2183.Parse.ContentDisposition.swift
+//  RFC_2183.ContentDisposition.Parse.swift
 //  swift-rfc-2183
 //
 //  Content-Disposition: disposition-type *(";" parameter)
@@ -8,7 +8,7 @@
 public import Parser_Primitives
 public import RFC_2045
 
-extension RFC_2183.Parse {
+extension RFC_2183.ContentDisposition {
     /// Parses a Content-Disposition header per RFC 2183 Section 2.
     ///
     /// `disposition = disposition-type *(";" disposition-parm)`
@@ -18,14 +18,14 @@ extension RFC_2183.Parse {
     /// Returns the disposition type and parameters as raw byte slices.
     /// Reuses `RFC_2045.Parse.Token` and `RFC_2045.Parse.QuotedString`
     /// since MIME parameter syntax is shared.
-    public struct ContentDisposition<Input: Collection.Slice.`Protocol`>: Sendable
+    public struct Parse<Input: Collection.Slice.`Protocol`>: Sendable
     where Input: Sendable, Input.Element == UInt8 {
         @inlinable
         public init() {}
     }
 }
 
-extension RFC_2183.Parse.ContentDisposition {
+extension RFC_2183.ContentDisposition.Parse {
     public struct Parameter: Sendable {
         public let name: Input
         public let value: Input
@@ -53,9 +53,9 @@ extension RFC_2183.Parse.ContentDisposition {
     }
 }
 
-extension RFC_2183.Parse.ContentDisposition: Parser.`Protocol` {
+extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
     public typealias ParseOutput = Output
-    public typealias Failure = RFC_2183.Parse.ContentDisposition<Input>.Error
+    public typealias Failure = RFC_2183.ContentDisposition.Parse<Input>.Error
 
     @inlinable
     public func parse(_ input: inout Input) throws(Failure) -> Output {
