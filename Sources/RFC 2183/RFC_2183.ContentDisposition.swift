@@ -244,25 +244,24 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
 
         var rawParams: [String: String] = [:]
 
-        // Split on semicolons to get parameter pairs
-        let paramPairs = parametersSlice.split(separator: .ascii.semicolon)
-        rawParams.reserveCapacity(paramPairs.count)
+        let pBytes = Array(parametersSlice)
+        var segStart = 0
 
-        for paramPair in paramPairs {
-            // Split on equals to get key=value
-            guard let equalsIndex = paramPair.firstIndex(of: .ascii.equalsSign) else {
-                continue
+        func processParam(_ lo: Int, _ hi: Int) {
+            let segment = pBytes[lo..<hi]
+
+            guard let equalsIndex = segment.firstIndex(of: .ascii.equalsSign) else {
+                return
             }
 
-            let keyBytes = (paramPair[..<equalsIndex]).trimming(.ascii.whitespaces)
-            guard !keyBytes.isEmpty else { continue }
+            let keyBytes = (segment[..<equalsIndex]).trimming(.ascii.whitespaces)
+            guard !keyBytes.isEmpty else { return }
 
-            let valueStartIndex = paramPair.index(after: equalsIndex)
-            let valueSlice = (paramPair[valueStartIndex...]).trimming(.ascii.whitespaces)
-            guard !valueSlice.isEmpty else { continue }
+            let valueSlice = (segment[(equalsIndex &+ 1)...]).trimming(.ascii.whitespaces)
+            guard !valueSlice.isEmpty else { return }
 
             // Determine quoting with a single forward pass
-            guard let firstByte = valueSlice.first else { continue }
+            guard let firstByte = valueSlice.first else { return }
 
             var lastByte = firstByte
             var length = 0
@@ -280,17 +279,23 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
                 && lastByte == .ascii.quotationMark
                 && length >= 2
             if isQuoted {
-                // Only now allocate a new buffer for the unescaped content
                 let inner = valueSlice.dropFirst().dropLast()
                 let unescaped = Self.unescapeQuotes(inner)
                 value = String(decoding: unescaped, as: UTF8.self)
             } else {
-                // No unescaping: decode directly from the slice, zero extra copies
                 value = String(decoding: valueSlice, as: UTF8.self)
             }
 
             rawParams[key] = value
         }
+
+        for idx in 0..<pBytes.count {
+            if pBytes[idx] == UInt8.ascii.semicolon {
+                processParam(segStart, idx)
+                segStart = idx &+ 1
+            }
+        }
+        processParam(segStart, pBytes.count)
 
         // Convert raw parameters to typed parameters
         self.parameters = Self.parseParameters(rawParams)
