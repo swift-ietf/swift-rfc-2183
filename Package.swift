@@ -20,7 +20,8 @@ let package = Package(
         .package(path: "../../swift-foundations/swift-ascii"),
         .package(path: "../swift-rfc-2045"),
         .package(path: "../swift-rfc-5322"),
-        .package(path: "../../swift-primitives/swift-binary-primitives")
+        .package(path: "../../swift-primitives/swift-binary-primitives"),
+        .package(path: "../../swift-primitives/swift-parser-primitives")
     ],
     targets: [
         .target(
@@ -29,7 +30,8 @@ let package = Package(
                 .product(name: "ASCII", package: "swift-ascii"),
                 .product(name: "RFC 2045", package: "swift-rfc-2045"),
                 .product(name: "RFC 5322", package: "swift-rfc-5322"),
-                .product(name: "Binary Primitives", package: "swift-binary-primitives")
+                .product(name: "Binary Primitives", package: "swift-binary-primitives"),
+                .product(name: "Parser Primitives", package: "swift-parser-primitives")
             ]
         ),
         .testTarget(
