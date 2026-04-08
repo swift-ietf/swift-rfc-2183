@@ -5,7 +5,8 @@
 //  Created by Coen ten Thije Boonkkamp on 19/11/2025.
 //
 
-public import ASCII
+public import ASCII_Serializer_Primitives
+public import INCITS_4_1986
 
 extension RFC_2183 {
     /// Validated filename for Content-Disposition filename parameter.

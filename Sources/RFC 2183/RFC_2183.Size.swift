@@ -5,7 +5,7 @@
 //  Created by Coen ten Thije Boonkkamp on 19/11/2025.
 //
 
-public import ASCII
+public import ASCII_Serializer_Primitives
 
 extension RFC_2183 {
     /// File size in bytes for Content-Disposition size parameter.
