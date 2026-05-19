@@ -62,7 +62,7 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
     public static func serialize<Buffer: RangeReplaceableCollection>(
         ascii filename: Self,
         into buffer: inout Buffer
-    ) where Buffer.Element == UInt8 {
+    ) where Buffer.Element == Byte {
         buffer.append(contentsOf: filename.value.utf8)
     }
 
@@ -74,25 +74,25 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
     /// ## Category Theory
     ///
     /// This is the fundamental parsing transformation:
-    /// - **Domain**: [UInt8] (ASCII bytes)
+    /// - **Domain**: [Byte] (ASCII bytes)
     /// - **Codomain**: RFC_2183.Filename (structured data)
     ///
     /// String-based parsing is derived as composition:
     /// ```
-    /// String → [UInt8] (UTF-8 bytes) → Filename
+    /// String → [Byte] (UTF-8 bytes) → Filename
     /// ```
     ///
     /// ## Example
     ///
     /// ```swift
-    /// let bytes = Array("document.pdf".utf8)
+    /// let bytes = Array<Byte>("document.pdf".utf8)
     /// let filename = try RFC_2183.Filename(ascii: bytes)
     /// ```
     ///
     /// - Parameter bytes: The ASCII byte representation of the filename
     /// - Throws: `RFC_2183.Filename.Error` if the bytes are malformed
     public init<Bytes: Collection>(ascii bytes: Bytes, in context: Void) throws(Error)
-    where Bytes.Element == UInt8 {
+    where Bytes.Element == Byte {
         // Empty check
         guard !bytes.isEmpty else {
             throw Error.empty
@@ -100,13 +100,15 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
 
         // Check for control characters and non-ASCII
         for byte in bytes {
-            guard byte.ascii.isVisible || byte == .ascii.space else {
-                if byte > 127 {
+            let code = ASCII.Code(byte)
+            guard code.isVisible || code == ASCII.Code.space else {
+                // audit: underlying — high-bit check is arithmetic-shaped (non-ASCII detection)
+                if byte.underlying > 127 {
                     throw Error.notASCII(String(decoding: bytes, as: UTF8.self))
                 }
                 throw Error.containsControlCharacters(
                     String(decoding: bytes, as: UTF8.self),
-                    byte: byte
+                    byte: code
                 )
             }
         }
@@ -134,7 +136,7 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
 
 // MARK: - Byte Serialization
 
-extension [UInt8] {
+extension [Byte] {
     /// Creates ASCII byte representation of an RFC 2183 filename
     ///
     /// This is the canonical serialization of filenames to bytes.
@@ -144,23 +146,23 @@ extension [UInt8] {
     ///
     /// This is the most universal serialization (natural transformation):
     /// - **Domain**: RFC_2183.Filename (structured data)
-    /// - **Codomain**: [UInt8] (ASCII bytes)
+    /// - **Codomain**: [Byte] (ASCII bytes)
     ///
     /// String representation is derived as composition:
     /// ```
-    /// Filename → [UInt8] (ASCII) → String (UTF-8 interpretation)
+    /// Filename → [Byte] (ASCII) → String (UTF-8 interpretation)
     /// ```
     ///
     /// ## Example
     ///
     /// ```swift
     /// let filename = try RFC_2183.Filename("document.pdf")
-    /// let bytes = [UInt8](filename)
+    /// let bytes = [Byte](filename)
     /// ```
     ///
     /// - Parameter filename: The filename to serialize
     public init(_ filename: RFC_2183.Filename) {
-        self = Array(filename.value.utf8)
+        self = Array<Byte>(filename.value.utf8)
     }
 }
 

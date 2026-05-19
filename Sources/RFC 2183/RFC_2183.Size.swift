@@ -58,7 +58,7 @@ extension RFC_2183.Size: Binary.ASCII.Serializable {
     public static func serialize<Buffer: RangeReplaceableCollection>(
         ascii size: Self,
         into buffer: inout Buffer
-    ) where Buffer.Element == UInt8 {
+    ) where Buffer.Element == Byte {
         buffer.append(contentsOf: String(size.bytes).utf8)
     }
 
@@ -70,25 +70,25 @@ extension RFC_2183.Size: Binary.ASCII.Serializable {
     /// ## Category Theory
     ///
     /// This is the fundamental parsing transformation:
-    /// - **Domain**: [UInt8] (ASCII bytes)
+    /// - **Domain**: [Byte] (ASCII bytes)
     /// - **Codomain**: RFC_2183.Size (structured data)
     ///
     /// String-based parsing is derived as composition:
     /// ```
-    /// String → [UInt8] (UTF-8 bytes) → Size
+    /// String → [Byte] (UTF-8 bytes) → Size
     /// ```
     ///
     /// ## Example
     ///
     /// ```swift
-    /// let bytes = Array("1024".utf8)
+    /// let bytes = Array<Byte>("1024".utf8)
     /// let size = try RFC_2183.Size(ascii: bytes)
     /// ```
     ///
     /// - Parameter bytes: The ASCII byte representation of the size
     /// - Throws: `RFC_2183.Size.Error` if the bytes are malformed
     public init<Bytes: Collection>(ascii bytes: Bytes, in context: Void) throws(Error)
-    where Bytes.Element == UInt8 {
+    where Bytes.Element == Byte {
         let string = String(decoding: bytes, as: UTF8.self)
         guard let value = Int(string) else {
             throw Error.invalidFormat(string)
@@ -102,7 +102,7 @@ extension RFC_2183.Size: Binary.ASCII.Serializable {
 
 // MARK: - Byte Serialization
 
-extension [UInt8] {
+extension [Byte] {
     /// Creates ASCII byte representation of an RFC 2183 size
     ///
     /// This is the canonical serialization of sizes to bytes.
@@ -112,23 +112,23 @@ extension [UInt8] {
     ///
     /// This is the most universal serialization (natural transformation):
     /// - **Domain**: RFC_2183.Size (structured data)
-    /// - **Codomain**: [UInt8] (ASCII bytes)
+    /// - **Codomain**: [Byte] (ASCII bytes)
     ///
     /// String representation is derived as composition:
     /// ```
-    /// Size → [UInt8] (ASCII) → String (UTF-8 interpretation)
+    /// Size → [Byte] (ASCII) → String (UTF-8 interpretation)
     /// ```
     ///
     /// ## Example
     ///
     /// ```swift
     /// let size = try RFC_2183.Size(bytes: 1024)
-    /// let bytes = [UInt8](size)
+    /// let bytes = [Byte](size)
     /// ```
     ///
     /// - Parameter size: The size to serialize
     public init(_ size: RFC_2183.Size) {
-        self = Array(String(size.bytes).utf8)
+        self = Array<Byte>(String(size.bytes).utf8)
     }
 }
 

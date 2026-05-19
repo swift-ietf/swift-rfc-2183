@@ -17,7 +17,7 @@ extension RFC_2183.Filename {
         case notASCII(String)
 
         /// Filename contains control characters
-        case containsControlCharacters(String, byte: UInt8)
+        case containsControlCharacters(String, byte: ASCII.Code)
 
         /// Filename contains path traversal (..)
         case containsPathTraversal(String)
