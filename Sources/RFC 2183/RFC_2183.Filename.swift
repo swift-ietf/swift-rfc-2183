@@ -102,8 +102,7 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
         for byte in bytes {
             let code = ASCII.Code(byte)
             guard code.isVisible || code == ASCII.Code.space else {
-                // audit: underlying — high-bit check is arithmetic-shaped (non-ASCII detection)
-                if byte.underlying > 127 {
+                if !code.isASCII {
                     throw Error.notASCII(String(decoding: bytes, as: UTF8.self))
                 }
                 throw Error.containsControlCharacters(
