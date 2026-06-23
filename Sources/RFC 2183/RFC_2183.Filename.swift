@@ -8,6 +8,10 @@
 public import ASCII_Serializer_Primitives
 public import INCITS_4_1986
 
+// `Code` aliases ASCII.Code at file scope — avoids the INCITS `[ASCII.Code].ASCII`
+// shadow inside the `extension [Byte]` below.
+private typealias Code = ASCII.Code
+
 extension RFC_2183 {
     /// Validated filename for Content-Disposition filename parameter.
     ///
@@ -101,7 +105,7 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
         // Check for control characters and non-ASCII
         for byte in bytes {
             let code = ASCII.Code(byte)
-            guard code.isVisible || code == ASCII.Code.space else {
+            guard code.isVisible || code == Code.space else {
                 if !code.isASCII {
                     throw Error.notASCII(String(decoding: bytes, as: UTF8.self))
                 }

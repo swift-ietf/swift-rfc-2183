@@ -10,6 +10,10 @@ public import INCITS_4_1986
 import RFC_2045
 public import RFC_5322
 
+// `Code` aliases ASCII.Code at file scope — avoids the INCITS `[ASCII.Code].ASCII`
+// shadow inside the `extension [Byte]` serialize/parse helpers below.
+private typealias Code = ASCII.Code
+
 extension RFC_2183 {
     /// Content-Disposition header field
     ///
@@ -90,100 +94,100 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
 
         // Add standard parameters in RFC-defined order
         if let filename = params.filename {
-            buffer.append(ASCII.Code.semicolon)
-            buffer.append(ASCII.Code.space)
+            buffer.append(Code.semicolon)
+            buffer.append(Code.space)
             buffer.append(contentsOf: "filename".utf8)
-            buffer.append(ASCII.Code.equalsSign)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.equalsSign)
+            buffer.append(Code.quotationMark)
 
             // Escape quotes in filename
             for char in filename.value {
                 if char == "\"" {
-                    buffer.append(ASCII.Code.reverseSolidus)
+                    buffer.append(Code.reverseSolidus)
                 }
                 buffer.append(contentsOf: char.utf8)
             }
 
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.quotationMark)
         }
 
         if let creationDate = params.creationDate {
-            buffer.append(ASCII.Code.semicolon)
-            buffer.append(ASCII.Code.space)
+            buffer.append(Code.semicolon)
+            buffer.append(Code.space)
             buffer.append(contentsOf: "creation-date".utf8)
-            buffer.append(ASCII.Code.equalsSign)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.equalsSign)
+            buffer.append(Code.quotationMark)
             RFC_5322.DateTime.serialize(ascii: creationDate, into: &buffer)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.quotationMark)
         }
 
         if let modificationDate = params.modificationDate {
-            buffer.append(ASCII.Code.semicolon)
-            buffer.append(ASCII.Code.space)
+            buffer.append(Code.semicolon)
+            buffer.append(Code.space)
             buffer.append(contentsOf: "modification-date".utf8)
-            buffer.append(ASCII.Code.equalsSign)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.equalsSign)
+            buffer.append(Code.quotationMark)
             RFC_5322.DateTime.serialize(ascii: modificationDate, into: &buffer)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.quotationMark)
         }
 
         if let readDate = params.readDate {
-            buffer.append(ASCII.Code.semicolon)
-            buffer.append(ASCII.Code.space)
+            buffer.append(Code.semicolon)
+            buffer.append(Code.space)
             buffer.append(contentsOf: "read-date".utf8)
-            buffer.append(ASCII.Code.equalsSign)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.equalsSign)
+            buffer.append(Code.quotationMark)
             RFC_5322.DateTime.serialize(ascii: readDate, into: &buffer)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.quotationMark)
         }
 
         if let size = params.size {
             // Size is unquoted per RFC 2183
-            buffer.append(ASCII.Code.semicolon)
-            buffer.append(ASCII.Code.space)
+            buffer.append(Code.semicolon)
+            buffer.append(Code.space)
             buffer.append(contentsOf: "size".utf8)
-            buffer.append(ASCII.Code.equalsSign)
+            buffer.append(Code.equalsSign)
             buffer.append(contentsOf: String(size.bytes).utf8)
         }
 
         // RFC 7578 extension - name parameter
         if let name = params.name {
-            buffer.append(ASCII.Code.semicolon)
-            buffer.append(ASCII.Code.space)
+            buffer.append(Code.semicolon)
+            buffer.append(Code.space)
             buffer.append(contentsOf: "name".utf8)
-            buffer.append(ASCII.Code.equalsSign)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.equalsSign)
+            buffer.append(Code.quotationMark)
 
             // Escape quotes in name
             for char in name {
                 if char == "\"" {
-                    buffer.append(ASCII.Code.reverseSolidus)
+                    buffer.append(Code.reverseSolidus)
                 }
                 buffer.append(contentsOf: char.utf8)
             }
 
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.quotationMark)
         }
 
         // Extension parameters in sorted order for stability
         for (key, value) in params.extensionParameters.sorted(by: {
             $0.key.rawValue < $1.key.rawValue
         }) {
-            buffer.append(ASCII.Code.semicolon)
-            buffer.append(ASCII.Code.space)
+            buffer.append(Code.semicolon)
+            buffer.append(Code.space)
             buffer.append(contentsOf: key.rawValue.utf8)
-            buffer.append(ASCII.Code.equalsSign)
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.equalsSign)
+            buffer.append(Code.quotationMark)
 
             // Escape quotes in value
             for char in value {
                 if char == "\"" {
-                    buffer.append(ASCII.Code.reverseSolidus)
+                    buffer.append(Code.reverseSolidus)
                 }
                 buffer.append(contentsOf: char.utf8)
             }
 
-            buffer.append(ASCII.Code.quotationMark)
+            buffer.append(Code.quotationMark)
         }
     }
 
@@ -215,7 +219,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
     public init<Bytes: Collection>(ascii bytes: Bytes, in context: Void) throws(Error)
     where Bytes.Element == Byte {
         // Split on first semicolon to separate type from parameters
-        guard let firstSemicolon = bytes.firstIndex(where: { $0 == ASCII.Code.semicolon }) else {
+        guard let firstSemicolon = bytes.firstIndex(where: { $0 == Code.semicolon }) else {
             // No parameters, just disposition type
             let typeString = String(decoding: bytes, as: UTF8.self)
                 .trimming(.ascii.whitespaces)
@@ -257,7 +261,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
         func processParam(_ lo: Int, _ hi: Int) {
             let segment = pCodes[lo..<hi]
 
-            guard let equalsIndex = segment.firstIndex(of: ASCII.Code.equalsSign) else {
+            guard let equalsIndex = segment.firstIndex(of: Code.equalsSign) else {
                 return
             }
 
@@ -272,21 +276,22 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
             guard !valueString.isEmpty else { return }
 
             // Re-lift the trimmed value back to ASCII.Code bytes for quotation detection.
-            let valueCodes = Array<ASCII.Code>(valueString.utf8)
+            // valueString is ASCII (decoded + trimmed from ASCII bytes); drop any stray non-ASCII.
+            let valueCodes = valueString.utf8.compactMap { try? ASCII.Code(Byte($0)) }
 
             // Determine quoting with a single forward pass
             guard let firstCode = valueCodes.first else { return }
             let lastCode = valueCodes.last ?? firstCode
             let length = valueCodes.count
 
-            // Lowercase at the ASCII byte level via BSLI bridge to Array<UInt8>
-            let keyUInt8s = Array<UInt8>(keyString.utf8)
-            let key = String(decoding: keyUInt8s.ascii.lowercased(), as: UTF8.self)
+            // Lowercase the ASCII parameter key (RFC 2183 param keys are ASCII tokens,
+            // so Unicode-default case folding is byte-identical to ASCII lowercasing).
+            let key = keyString.lowercased()
 
             let value: String
             let isQuoted =
-                firstCode == ASCII.Code.quotationMark
-                && lastCode == ASCII.Code.quotationMark
+                firstCode == Code.quotationMark
+                && lastCode == Code.quotationMark
                 && length >= 2
             if isQuoted {
                 let inner = valueCodes.dropFirst().dropLast()
@@ -300,7 +305,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
         }
 
         for idx in 0..<pCodes.count {
-            if pCodes[idx] == ASCII.Code.semicolon {
+            if pCodes[idx] == Code.semicolon {
                 processParam(segStart, idx)
                 segStart = idx &+ 1
             }
@@ -333,11 +338,11 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
             // Check for backslash + quote
             let isEscapedQuote =
                 nextIndex != end
-                && current == ASCII.Code.reverseSolidus  // '\'
-                && bytes[nextIndex] == ASCII.Code.quotationMark  // '"'
+                && current == Code.reverseSolidus  // '\'
+                && bytes[nextIndex] == Code.quotationMark  // '"'
             if isEscapedQuote {
                 // Include only the quote
-                result.append(ASCII.Code.quotationMark)
+                result.append(Code.quotationMark)
 
                 // Skip both characters
                 i = bytes.index(after: nextIndex)
