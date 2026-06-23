@@ -219,7 +219,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
     public init<Bytes: Collection>(ascii bytes: Bytes, in context: Void) throws(Error)
     where Bytes.Element == Byte {
         // Split on first semicolon to separate type from parameters
-        guard let firstSemicolon = bytes.firstIndex(where: { $0 == Code.semicolon }) else {
+        guard let firstSemicolon = bytes.firstIndex(where: { $0 == Code.semicolon.byte }) else {
             // No parameters, just disposition type
             let typeString = String(decoding: bytes, as: UTF8.self)
                 .trimming(.ascii.whitespaces)
