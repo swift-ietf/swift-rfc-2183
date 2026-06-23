@@ -246,7 +246,12 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
         // Type-up: lift to [ASCII.Code] for grammar work (semicolon/equals scanning,
         // quotation detection); allocate Array<UInt8> for the lowercase helper at the
         // single call site below per BSLI bridge.
-        let pCodes = Array<ASCII.Code>(parametersSlice)
+        let pCodes: [ASCII.Code]
+        do {
+            pCodes = try Array<ASCII.Code>(parametersSlice)
+        } catch {
+            throw Error.invalidFormat(String(decoding: bytes, as: UTF8.self))
+        }
         var segStart = 0
 
         func processParam(_ lo: Int, _ hi: Int) {
