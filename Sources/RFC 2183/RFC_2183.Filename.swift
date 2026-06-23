@@ -104,11 +104,15 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
 
         // Check for control characters and non-ASCII
         for byte in bytes {
-            let code = ASCII.Code(byte)
+            // ASCII.Code(_:) now throws on non-ASCII bytes — that throw IS the notASCII case.
+            let code: ASCII.Code
+            do {
+                code = try ASCII.Code(byte)
+            } catch {
+                throw Error.notASCII(String(decoding: bytes, as: UTF8.self))
+            }
             guard code.isVisible || code == Code.space else {
-                if !code.isASCII {
-                    throw Error.notASCII(String(decoding: bytes, as: UTF8.self))
-                }
+                // Construction succeeded, so the byte is ASCII: a control character.
                 throw Error.containsControlCharacters(
                     String(decoding: bytes, as: UTF8.self),
                     byte: code
