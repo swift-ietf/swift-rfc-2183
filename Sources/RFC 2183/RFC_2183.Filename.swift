@@ -6,6 +6,8 @@
 //
 
 public import ASCII_Serializer_Primitives
+public import Binary_Serializable_Primitives
+public import Parseable_ASCII_Primitives
 public import INCITS_4_1986
 
 // `Code` aliases ASCII.Code at file scope — avoids the INCITS `[ASCII.Code].ASCII`
@@ -60,14 +62,40 @@ extension RFC_2183 {
     }
 }
 
-// MARK: - Binary.ASCII.Serializable
+// MARK: - Serialization (family-Codable twins)
 
-extension RFC_2183.Filename: Binary.ASCII.Serializable {
+extension RFC_2183.Filename: Swift.RawRepresentable, Serializable, ASCII.Serializable, Binary.Serializable {
+    public var rawValue: String { value }
+
+    public init?(rawValue: String) {
+        try? self.init(rawValue)
+    }
+
+    /// Explicit witness disambiguating the two constraint-incomparable
+    /// `serialize(_:into:)` defaults. The bytes derive from the free
+    /// `[ASCII.Code]` serializer supplied by the `String`-RawRepresentable
+    /// default (`.serialized`).
     public static func serialize<Buffer: RangeReplaceableCollection>(
-        ascii filename: Self,
+        _ value: Self,
         into buffer: inout Buffer
     ) where Buffer.Element == Byte {
-        buffer.append(contentsOf: filename.value.utf8)
+        buffer.append(contentsOf: value.serialized)
+    }
+}
+
+// MARK: - CustomStringConvertible
+
+extension RFC_2183.Filename: CustomStringConvertible {
+    public var description: String { String(decoding: serialized, as: UTF8.self) }
+}
+
+// MARK: - Parsing
+
+extension RFC_2183.Filename: ASCII.Parseable {
+    /// Re-provides the string convenience initializer (previously inherited from
+    /// the retired combined ASCII serializable protocol).
+    public init(_ string: some StringProtocol) throws(Error) {
+        try self.init(ascii: [Byte](string.utf8))
     }
 
     /// Parses a filename from canonical byte representation (CANONICAL PRIMITIVE)
@@ -95,7 +123,7 @@ extension RFC_2183.Filename: Binary.ASCII.Serializable {
     ///
     /// - Parameter bytes: The ASCII byte representation of the filename
     /// - Throws: `RFC_2183.Filename.Error` if the bytes are malformed
-    public init<Bytes: Collection>(ascii bytes: Bytes, in context: Void) throws(Error)
+    public init<Bytes: Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
         // Empty check
         guard !bytes.isEmpty else {
@@ -173,14 +201,3 @@ extension [Byte] {
     }
 }
 
-// MARK: - Protocol Conformances
-
-extension RFC_2183.Filename: RawRepresentable {
-    public var rawValue: String { value }
-
-    public init?(rawValue: String) {
-        try? self.init(rawValue)
-    }
-}
-
-extension RFC_2183.Filename: CustomStringConvertible {}

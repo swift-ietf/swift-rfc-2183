@@ -6,6 +6,8 @@
 //
 
 public import ASCII_Serializer_Primitives
+public import Binary_Serializable_Primitives
+public import Parseable_ASCII_Primitives
 
 extension RFC_2183 {
     /// File size in bytes for Content-Disposition size parameter.
@@ -52,16 +54,9 @@ extension RFC_2183 {
     }
 }
 
-// MARK: - Binary.ASCII.Serializable
+// MARK: - Parsing
 
-extension RFC_2183.Size: Binary.ASCII.Serializable {
-    public static func serialize<Buffer: RangeReplaceableCollection>(
-        ascii size: Self,
-        into buffer: inout Buffer
-    ) where Buffer.Element == Byte {
-        buffer.append(contentsOf: String(size.bytes).utf8)
-    }
-
+extension RFC_2183.Size: ASCII.Parseable {
     /// Parses a size from canonical byte representation (CANONICAL PRIMITIVE)
     ///
     /// This is the primitive parser that works at the byte level.
@@ -87,7 +82,7 @@ extension RFC_2183.Size: Binary.ASCII.Serializable {
     ///
     /// - Parameter bytes: The ASCII byte representation of the size
     /// - Throws: `RFC_2183.Size.Error` if the bytes are malformed
-    public init<Bytes: Collection>(ascii bytes: Bytes, in context: Void) throws(Error)
+    public init<Bytes: Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
         let string = String(decoding: bytes, as: UTF8.self)
         guard let value = Int(string) else {
@@ -132,9 +127,9 @@ extension [Byte] {
     }
 }
 
-// MARK: - Protocol Conformances
+// MARK: - Serialization (family-Codable twins)
 
-extension RFC_2183.Size: RawRepresentable {
+extension RFC_2183.Size: Swift.RawRepresentable, Serializable, ASCII.Serializable, Binary.Serializable {
     public var rawValue: String { String(bytes) }
 
     public init?(rawValue: String) {
@@ -143,9 +138,24 @@ extension RFC_2183.Size: RawRepresentable {
         }
         self.init(__unchecked: value)
     }
+
+    /// Explicit witness disambiguating the two constraint-incomparable
+    /// `serialize(_:into:)` defaults. The bytes derive from the free
+    /// `[ASCII.Code]` serializer supplied by the `String`-RawRepresentable
+    /// default (`.serialized`).
+    public static func serialize<Buffer: RangeReplaceableCollection>(
+        _ value: Self,
+        into buffer: inout Buffer
+    ) where Buffer.Element == Byte {
+        buffer.append(contentsOf: value.serialized)
+    }
 }
 
-extension RFC_2183.Size: CustomStringConvertible {}
+// MARK: - CustomStringConvertible
+
+extension RFC_2183.Size: CustomStringConvertible {
+    public var description: String { String(decoding: serialized, as: UTF8.self) }
+}
 
 extension RFC_2183.Size: LosslessStringConvertible {
     public init?(_ description: String) {
