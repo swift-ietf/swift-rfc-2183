@@ -64,11 +64,21 @@ extension RFC_2183 {
 
 // MARK: - Serialization (family-Codable twins)
 
-extension RFC_2183.Filename: Swift.RawRepresentable, Serializable, ASCII.Serializable, Binary.Serializable {
+extension RFC_2183.Filename: Swift.RawRepresentable, ASCII.Serializable, Binary.Serializable {
     public var rawValue: String { value }
 
     public init?(rawValue: String) {
         try? self.init(rawValue)
+    }
+
+    /// Own `ASCII.Serializable` verb ([FAM-012] Phase D): emits the validated
+    /// filename `rawValue` as ASCII codes directly, replacing reliance on the
+    /// transitional `String`-RawRepresentable default.
+    public static func serialize<Buffer: RangeReplaceableCollection>(
+        _ value: Self,
+        into buffer: inout Buffer
+    ) where Buffer.Element == ASCII.Code {
+        for byte in value.rawValue.utf8 { buffer.append(ASCII.Code(byte)) }
     }
 
     /// Explicit witness disambiguating the two constraint-incomparable

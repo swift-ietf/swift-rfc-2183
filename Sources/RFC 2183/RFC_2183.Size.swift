@@ -129,7 +129,7 @@ extension [Byte] {
 
 // MARK: - Serialization (family-Codable twins)
 
-extension RFC_2183.Size: Swift.RawRepresentable, Serializable, ASCII.Serializable, Binary.Serializable {
+extension RFC_2183.Size: Swift.RawRepresentable, ASCII.Serializable, Binary.Serializable {
     public var rawValue: String { String(bytes) }
 
     public init?(rawValue: String) {
@@ -137,6 +137,16 @@ extension RFC_2183.Size: Swift.RawRepresentable, Serializable, ASCII.Serializabl
             return nil
         }
         self.init(__unchecked: value)
+    }
+
+    /// Own `ASCII.Serializable` verb ([FAM-012] Phase D): emits the decimal
+    /// `rawValue` as ASCII codes directly, replacing reliance on the
+    /// transitional `String`-RawRepresentable default.
+    public static func serialize<Buffer: RangeReplaceableCollection>(
+        _ value: Self,
+        into buffer: inout Buffer
+    ) where Buffer.Element == ASCII.Code {
+        for byte in value.rawValue.utf8 { buffer.append(ASCII.Code(byte)) }
     }
 
     /// Explicit witness disambiguating the two constraint-incomparable

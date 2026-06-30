@@ -117,7 +117,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
             buffer.append(contentsOf: "creation-date".utf8)
             buffer.append(Code.equalsSign)
             buffer.append(Code.quotationMark)
-            RFC_5322.DateTime.serialize(ascii: creationDate, into: &buffer)
+            RFC_5322.DateTime.serialize(creationDate, into: &buffer)
             buffer.append(Code.quotationMark)
         }
 
@@ -127,7 +127,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
             buffer.append(contentsOf: "modification-date".utf8)
             buffer.append(Code.equalsSign)
             buffer.append(Code.quotationMark)
-            RFC_5322.DateTime.serialize(ascii: modificationDate, into: &buffer)
+            RFC_5322.DateTime.serialize(modificationDate, into: &buffer)
             buffer.append(Code.quotationMark)
         }
 
@@ -137,7 +137,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
             buffer.append(contentsOf: "read-date".utf8)
             buffer.append(Code.equalsSign)
             buffer.append(Code.quotationMark)
-            RFC_5322.DateTime.serialize(ascii: readDate, into: &buffer)
+            RFC_5322.DateTime.serialize(readDate, into: &buffer)
             buffer.append(Code.quotationMark)
         }
 
