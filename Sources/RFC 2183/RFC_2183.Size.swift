@@ -149,22 +149,24 @@ extension RFC_2183.Size: Swift.RawRepresentable, ASCII.Serializable, Binary.Seri
         for byte in value.rawValue.utf8 { buffer.append(ASCII.Code(byte)) }
     }
 
-    /// Explicit witness disambiguating the two constraint-incomparable
-    /// `serialize(_:into:)` defaults. The bytes derive from the free
-    /// `[ASCII.Code]` serializer supplied by the `String`-RawRepresentable
-    /// default (`.serialized`).
+    /// Own `Binary.Serializable` verb ([FAM-012] clause-9): an independent body
+    /// re-emitting the decimal `rawValue` directly into the `Byte` domain
+    /// (RFC 2183 sizes are ASCII digits) — an independent body, not a
+    /// byte-detour through the ASCII verb. Byte-equivalent to the ASCII form.
     public static func serialize<Buffer: RangeReplaceableCollection>(
         _ value: Self,
         into buffer: inout Buffer
     ) where Buffer.Element == Byte {
-        buffer.append(contentsOf: value.serialized)
+        for byte in value.rawValue.utf8 { buffer.append(Byte(byte)) }
     }
 }
 
 // MARK: - CustomStringConvertible
 
 extension RFC_2183.Size: CustomStringConvertible {
-    public var description: String { String(decoding: serialized, as: UTF8.self) }
+    /// The decimal byte count — the same text the `ASCII.Serializable` /
+    /// `Binary.Serializable` verbs emit.
+    public var description: String { String(bytes) }
 }
 
 extension RFC_2183.Size: LosslessStringConvertible {

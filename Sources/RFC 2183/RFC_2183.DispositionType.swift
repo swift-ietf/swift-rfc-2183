@@ -5,6 +5,9 @@
 //  Created by Coen ten Thije Boonkkamp on 19/11/2025.
 //
 
+public import ASCII_Serializer_Primitives
+public import Binary_Serializable_Primitives
+
 extension RFC_2183 {
     /// Disposition type for Content-Disposition header
     ///
@@ -62,4 +65,27 @@ extension RFC_2183.DispositionType {
     ///
     /// Used in multipart/form-data submissions with field names and filenames
     public static let formData = Self(rawValue: "form-data")
+}
+
+// MARK: - ASCII.Serializable / Binary.Serializable ([FAM-012] format siblings)
+
+extension RFC_2183.DispositionType: ASCII.Serializable, Binary.Serializable {
+    /// [FAM-012] text sibling — emits the (lowercased) disposition token as the
+    /// typed text substrate `ASCII.Code`.
+    public static func serialize<Buffer: RangeReplaceableCollection>(
+        _ value: Self,
+        into buffer: inout Buffer
+    ) where Buffer.Element == ASCII.Code {
+        for byte in value.rawValue.utf8 { buffer.append(ASCII.Code(byte)) }
+    }
+
+    /// [FAM-012] binary sibling. Clause-9: an independent body re-emitting the
+    /// token directly into the `Byte` domain (a disposition token is ASCII) —
+    /// not a byte-detour through the ASCII verb.
+    public static func serialize<Buffer: RangeReplaceableCollection>(
+        _ value: Self,
+        into buffer: inout Buffer
+    ) where Buffer.Element == Byte {
+        for byte in value.rawValue.utf8 { buffer.append(Byte(byte)) }
+    }
 }

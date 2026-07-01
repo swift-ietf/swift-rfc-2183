@@ -6,6 +6,8 @@
 //
 
 public import ASCII_Serializer_Primitives
+public import Binary_Serializable_Primitives
+public import Parseable_ASCII_Primitives
 public import INCITS_4_1986
 import RFC_2045
 public import RFC_5322
@@ -80,115 +82,40 @@ extension [Byte] {
     }
 }
 
-// MARK: - Binary.ASCII.Serializable
+// MARK: - ASCII.Serializable / Binary.Serializable ([FAM-012] format siblings)
 
-extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
+extension RFC_2183.ContentDisposition: ASCII.Serializable, Binary.Serializable {
+    /// [FAM-012] text sibling — composes the `DispositionType` + `Parameters`
+    /// ASCII verbs directly (clause-9: ASCII verb → sub-part ASCII verbs), never
+    /// reaching into a sub-part's `rawValue`/property.
     public static func serialize<Buffer: RangeReplaceableCollection>(
-        ascii disposition: Self,
+        _ disposition: Self,
+        into buffer: inout Buffer
+    ) where Buffer.Element == ASCII.Code {
+        RFC_2183.DispositionType.serialize(disposition.type, into: &buffer)
+        RFC_2183.Parameters.serialize(disposition.parameters, into: &buffer)
+    }
+
+    /// [FAM-012] binary sibling. Clause-9: composes the `DispositionType` +
+    /// `Parameters` Byte verbs directly (Byte verb → sub-part Byte verbs) —
+    /// never a byte-detour through the ASCII verb. Byte-equivalent to the text
+    /// form (Content-Disposition is ASCII).
+    public static func serialize<Buffer: RangeReplaceableCollection>(
+        _ disposition: Self,
         into buffer: inout Buffer
     ) where Buffer.Element == Byte {
-        // Append disposition type
-        buffer.append(contentsOf: disposition.type.rawValue.utf8)
+        RFC_2183.DispositionType.serialize(disposition.type, into: &buffer)
+        RFC_2183.Parameters.serialize(disposition.parameters, into: &buffer)
+    }
+}
 
-        let params = disposition.parameters
+// MARK: - ASCII.Parseable ([FAM-012] parse — free-standing init)
 
-        // Add standard parameters in RFC-defined order
-        if let filename = params.filename {
-            buffer.append(Code.semicolon)
-            buffer.append(Code.space)
-            buffer.append(contentsOf: "filename".utf8)
-            buffer.append(Code.equalsSign)
-            buffer.append(Code.quotationMark)
-
-            // Escape quotes in filename
-            for char in filename.value {
-                if char == "\"" {
-                    buffer.append(Code.reverseSolidus)
-                }
-                buffer.append(contentsOf: char.utf8)
-            }
-
-            buffer.append(Code.quotationMark)
-        }
-
-        if let creationDate = params.creationDate {
-            buffer.append(Code.semicolon)
-            buffer.append(Code.space)
-            buffer.append(contentsOf: "creation-date".utf8)
-            buffer.append(Code.equalsSign)
-            buffer.append(Code.quotationMark)
-            RFC_5322.DateTime.serialize(creationDate, into: &buffer)
-            buffer.append(Code.quotationMark)
-        }
-
-        if let modificationDate = params.modificationDate {
-            buffer.append(Code.semicolon)
-            buffer.append(Code.space)
-            buffer.append(contentsOf: "modification-date".utf8)
-            buffer.append(Code.equalsSign)
-            buffer.append(Code.quotationMark)
-            RFC_5322.DateTime.serialize(modificationDate, into: &buffer)
-            buffer.append(Code.quotationMark)
-        }
-
-        if let readDate = params.readDate {
-            buffer.append(Code.semicolon)
-            buffer.append(Code.space)
-            buffer.append(contentsOf: "read-date".utf8)
-            buffer.append(Code.equalsSign)
-            buffer.append(Code.quotationMark)
-            RFC_5322.DateTime.serialize(readDate, into: &buffer)
-            buffer.append(Code.quotationMark)
-        }
-
-        if let size = params.size {
-            // Size is unquoted per RFC 2183
-            buffer.append(Code.semicolon)
-            buffer.append(Code.space)
-            buffer.append(contentsOf: "size".utf8)
-            buffer.append(Code.equalsSign)
-            buffer.append(contentsOf: String(size.bytes).utf8)
-        }
-
-        // RFC 7578 extension - name parameter
-        if let name = params.name {
-            buffer.append(Code.semicolon)
-            buffer.append(Code.space)
-            buffer.append(contentsOf: "name".utf8)
-            buffer.append(Code.equalsSign)
-            buffer.append(Code.quotationMark)
-
-            // Escape quotes in name
-            for char in name {
-                if char == "\"" {
-                    buffer.append(Code.reverseSolidus)
-                }
-                buffer.append(contentsOf: char.utf8)
-            }
-
-            buffer.append(Code.quotationMark)
-        }
-
-        // Extension parameters in sorted order for stability
-        for (key, value) in params.extensionParameters.sorted(by: {
-            $0.key.rawValue < $1.key.rawValue
-        }) {
-            buffer.append(Code.semicolon)
-            buffer.append(Code.space)
-            buffer.append(contentsOf: key.rawValue.utf8)
-            buffer.append(Code.equalsSign)
-            buffer.append(Code.quotationMark)
-
-            // Escape quotes in value
-            for char in value {
-                if char == "\"" {
-                    buffer.append(Code.reverseSolidus)
-                }
-                buffer.append(contentsOf: char.utf8)
-            }
-
-            buffer.append(Code.quotationMark)
-        }
+extension RFC_2183.ContentDisposition: ASCII.Parseable {
+    /// Re-provides the string convenience initializer (previously inherited
+    /// from the retired combined ASCII serializable protocol).
+    public init(_ string: some StringProtocol) throws(Error) {
+        try self.init(ascii: [Byte](string.utf8))
     }
 
     /// Parses a Content-Disposition header from canonical byte representation (CANONICAL PRIMITIVE)
@@ -216,7 +143,7 @@ extension RFC_2183.ContentDisposition: Binary.ASCII.Serializable {
     ///
     /// - Parameter bytes: The ASCII byte representation of the header value
     /// - Throws: `RFC_2183.ContentDisposition.Error` if the bytes are malformed
-    public init<Bytes: Collection>(ascii bytes: Bytes, in context: Void) throws(Error)
+    public init<Bytes: Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
         // Split on first semicolon to separate type from parameters
         guard let firstSemicolon = bytes.firstIndex(where: { $0 == Code.semicolon.byte }) else {
@@ -560,7 +487,17 @@ extension RFC_2183.ContentDisposition {
 
 // MARK: - Protocol Conformances
 
-extension RFC_2183.ContentDisposition: CustomStringConvertible {}
+extension RFC_2183.ContentDisposition: CustomStringConvertible {
+    /// The `disposition-type *(";" parameter)` form — the same grammar the
+    /// `ASCII.Serializable` / `Binary.Serializable` verbs emit. Re-provided
+    /// directly; the retired combined ASCII serializable protocol no longer
+    /// synthesizes it. Derived from the ASCII verb ([FAM-004] additive accessor).
+    public var description: String {
+        var codes: [ASCII.Code] = []
+        Self.serialize(self, into: &codes)
+        return String(decoding: codes.map(\.byte), as: UTF8.self)
+    }
+}
 
 extension RFC_2183.DispositionType: ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
