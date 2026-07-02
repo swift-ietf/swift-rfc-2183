@@ -24,7 +24,7 @@ Add this package to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-standards/swift-rfc-2183.git", from: "0.1.0")
+    .package(url: "https://github.com/swift-ietf/swift-rfc-2183.git", from: "0.4.5")
 ]
 ```
 
