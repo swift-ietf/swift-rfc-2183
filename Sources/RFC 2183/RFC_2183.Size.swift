@@ -123,7 +123,7 @@ extension [Byte] {
     ///
     /// - Parameter size: The size to serialize
     public init(_ size: RFC_2183.Size) {
-        self = Array<Byte>(String(size.bytes).utf8)
+        self = [Byte](String(size.bytes).utf8)
     }
 }
 

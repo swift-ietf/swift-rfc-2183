@@ -7,8 +7,8 @@
 
 public import ASCII_Serializer_Primitives
 public import Binary_Serializable_Primitives
-public import Parseable_ASCII_Primitives
 public import INCITS_4_1986
+public import Parseable_ASCII_Primitives
 import RFC_2045
 public import RFC_5322
 
@@ -53,10 +53,10 @@ extension RFC_2183 {
     /// > information for a message or body part. The disposition-type indicates
     /// > how the part should be handled.
     public struct ContentDisposition: Hashable, Sendable, Codable {
-        /// The disposition type (inline, attachment, etc.)
+        /// The disposition type (inline, attachment, and similar values)
         public let type: DispositionType
 
-        /// Typed parameters (filename, size, dates, etc.)
+        /// Typed parameters (filename, size, dates, and similar values)
         public let parameters: Parameters
 
         /// Creates a new Content-Disposition header
@@ -78,7 +78,7 @@ extension [Byte] {
     public init(
         _ contentDisposition: RFC_2183.ContentDisposition.Type
     ) {
-        self = Array<Byte>("Content-Disposition".utf8)
+        self = [Byte]("Content-Disposition".utf8)
     }
 }
 
@@ -179,7 +179,7 @@ extension RFC_2183.ContentDisposition: ASCII.Parseable {
         // single call site below per BSLI bridge.
         let pCodes: [ASCII.Code]
         do {
-            pCodes = try Array<ASCII.Code>(parametersSlice)
+            pCodes = try [ASCII.Code](parametersSlice)
         } catch {
             throw Error.invalidFormat(String(decoding: bytes, as: UTF8.self))
         }
@@ -297,15 +297,15 @@ extension RFC_2183.ContentDisposition {
         }
 
         if let creationDateStr = raw["creation-date"] {
-            params.creationDate = try? RFC_5322.DateTime(ascii: Array<Byte>(creationDateStr.utf8))
+            params.creationDate = try? RFC_5322.DateTime(ascii: [Byte](creationDateStr.utf8))
         }
 
         if let modDateStr = raw["modification-date"] {
-            params.modificationDate = try? RFC_5322.DateTime(ascii: Array<Byte>(modDateStr.utf8))
+            params.modificationDate = try? RFC_5322.DateTime(ascii: [Byte](modDateStr.utf8))
         }
 
         if let readDateStr = raw["read-date"] {
-            params.readDate = try? RFC_5322.DateTime(ascii: Array<Byte>(readDateStr.utf8))
+            params.readDate = try? RFC_5322.DateTime(ascii: [Byte](readDateStr.utf8))
         }
 
         if let sizeStr = raw["size"] {
