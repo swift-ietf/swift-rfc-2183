@@ -45,12 +45,14 @@ extension RFC_2183 {
             }
             self.init(__unchecked: bytes)
         }
+    }
+}
 
-        // MARK: - Comparable
+// MARK: - Comparable
 
-        public static func < (lhs: Size, rhs: Size) -> Bool {
-            lhs.bytes < rhs.bytes
-        }
+extension RFC_2183.Size {
+    public static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.bytes < rhs.bytes
     }
 }
 

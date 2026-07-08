@@ -178,7 +178,7 @@ extension RFC_2183.ContentDisposition: ASCII.Parseable {
         // quotation detection); allocate Array<UInt8> for the lowercase helper at the
         // single call site below per BSLI bridge.
         let pCodes: [ASCII.Code]
-        do {
+        do throws(ASCII.Code.Error) {
             pCodes = try [ASCII.Code](parametersSlice)
         } catch {
             throw Error.invalidFormat(String(decoding: bytes, as: UTF8.self))

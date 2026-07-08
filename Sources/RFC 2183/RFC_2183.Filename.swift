@@ -51,14 +51,16 @@ extension RFC_2183 {
         init(__unchecked value: String) {
             self.value = value
         }
+    }
+}
 
-        /// The base filename without any path components.
-        ///
-        /// This is equivalent to the validated value since path components
-        /// are already rejected during validation.
-        public var baseName: String {
-            value
-        }
+extension RFC_2183.Filename {
+    /// The base filename without any path components.
+    ///
+    /// This is equivalent to the validated value since path components
+    /// are already rejected during validation.
+    public var baseName: String {
+        value
     }
 }
 
@@ -146,7 +148,7 @@ extension RFC_2183.Filename: ASCII.Parseable {
         for byte in bytes {
             // ASCII.Code(_:) now throws on non-ASCII bytes — that throw IS the notASCII case.
             let code: ASCII.Code
-            do {
+            do throws(ASCII.Code.Error) {
                 code = try ASCII.Code(byte)
             } catch {
                 throw Error.notASCII(String(decoding: bytes, as: UTF8.self))

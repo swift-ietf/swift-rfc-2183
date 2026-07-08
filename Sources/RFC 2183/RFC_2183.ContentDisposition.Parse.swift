@@ -60,7 +60,7 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
     public func parse(_ input: inout Input) throws(Failure) -> Output {
         // Parse disposition type (token)
         let dispositionType: Input
-        do {
+        do throws(RFC_2045.Parse.Token<Input>.Error) {
             dispositionType = try RFC_2045.Parse.Token<Input>().parse(&input)
         } catch {
             throw .expectedToken
@@ -118,7 +118,7 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
     }
 
     @inlinable
-    static func _skipOWS(_ input: inout Input) {
+    package static func _skipOWS(_ input: inout Input) {
         while input.startIndex < input.endIndex {
             let byte = input[input.startIndex]
             guard byte == 0x20 || byte == 0x09 else { break }
