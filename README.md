@@ -29,6 +29,17 @@ dependencies: [
 ]
 ```
 
+Add the product to a target that needs it:
+
+```swift
+.target(
+    name: "YourTarget",
+    dependencies: [
+        .product(name: "RFC 2183", package: "swift-rfc-2183")
+    ]
+)
+```
+
 ## Usage
 
 ### Basic Usage
