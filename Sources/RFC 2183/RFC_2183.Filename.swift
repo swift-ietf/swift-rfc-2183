@@ -70,7 +70,11 @@ extension RFC_2183.Filename: Swift.RawRepresentable, ASCII.Serializable, Binary.
     public var rawValue: String { value }
 
     public init?(rawValue: String) {
-        try? self.init(rawValue)
+        do throws(RFC_2183.Filename.Error) {
+            try self.init(rawValue)
+        } catch {
+            return nil
+        }
     }
 
     /// Own `ASCII.Serializable` verb ([FAM-012] Phase D): emits the validated

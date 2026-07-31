@@ -204,7 +204,13 @@ extension RFC_2183.ContentDisposition: ASCII.Parseable {
 
             // Re-lift the trimmed value back to ASCII.Code bytes for quotation detection.
             // valueString is ASCII (decoded + trimmed from ASCII bytes); drop any stray non-ASCII.
-            let valueCodes = valueString.utf8.compactMap { try? ASCII.Code(Byte($0)) }
+            let valueCodes = valueString.utf8.compactMap { byte -> ASCII.Code? in
+                do throws(ASCII.Code.Error) {
+                    return try ASCII.Code(Byte(byte))
+                } catch {
+                    return nil
+                }
+            }
 
             // Determine quoting with a single forward pass
             guard let firstCode = valueCodes.first else { return }
@@ -293,23 +299,43 @@ extension RFC_2183.ContentDisposition {
 
         // Parse standard parameters with validation (silently ignore invalid values)
         if let filenameStr = raw["filename"] {
-            params.filename = try? RFC_2183.Filename(filenameStr)
+            do throws(RFC_2183.Filename.Error) {
+                params.filename = try RFC_2183.Filename(filenameStr)
+            } catch {
+                params.filename = nil
+            }
         }
 
         if let creationDateStr = raw["creation-date"] {
-            params.creationDate = try? RFC_5322.DateTime(ascii: [Byte](creationDateStr.utf8))
+            do throws(RFC_5322.DateTime.Error) {
+                params.creationDate = try RFC_5322.DateTime(ascii: [Byte](creationDateStr.utf8))
+            } catch {
+                params.creationDate = nil
+            }
         }
 
         if let modDateStr = raw["modification-date"] {
-            params.modificationDate = try? RFC_5322.DateTime(ascii: [Byte](modDateStr.utf8))
+            do throws(RFC_5322.DateTime.Error) {
+                params.modificationDate = try RFC_5322.DateTime(ascii: [Byte](modDateStr.utf8))
+            } catch {
+                params.modificationDate = nil
+            }
         }
 
         if let readDateStr = raw["read-date"] {
-            params.readDate = try? RFC_5322.DateTime(ascii: [Byte](readDateStr.utf8))
+            do throws(RFC_5322.DateTime.Error) {
+                params.readDate = try RFC_5322.DateTime(ascii: [Byte](readDateStr.utf8))
+            } catch {
+                params.readDate = nil
+            }
         }
 
         if let sizeStr = raw["size"] {
-            params.size = try? RFC_2183.Size(bytes: Int(sizeStr) ?? -1)
+            do throws(RFC_2183.Size.Error) {
+                params.size = try RFC_2183.Size(bytes: Int(sizeStr) ?? -1)
+            } catch {
+                params.size = nil
+            }
         }
 
         // RFC 7578 extension

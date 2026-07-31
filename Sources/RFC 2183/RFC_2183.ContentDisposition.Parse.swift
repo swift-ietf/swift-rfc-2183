@@ -85,7 +85,10 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
             Self._skipOWS(&input)
 
             // Parse parameter name (token)
-            guard let name = try? RFC_2045.Parse.Token<Input>().parse(&input) else {
+            let name: Input
+            do throws(RFC_2045.Parse.Token<Input>.Error) {
+                name = try RFC_2045.Parse.Token<Input>().parse(&input)
+            } catch {
                 break
             }
 
@@ -100,12 +103,18 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
             // Parse value (token or quoted-string)
             let value: Input
             if input.startIndex < input.endIndex && input[input.startIndex] == 0x22 {
-                guard let qs = try? RFC_2045.Parse.QuotedString<Input>().parse(&input) else {
+                let qs: Input
+                do throws(RFC_2045.Parse.QuotedString<Input>.Error) {
+                    qs = try RFC_2045.Parse.QuotedString<Input>().parse(&input)
+                } catch {
                     break
                 }
                 value = qs
             } else {
-                guard let tok = try? RFC_2045.Parse.Token<Input>().parse(&input) else {
+                let tok: Input
+                do throws(RFC_2045.Parse.Token<Input>.Error) {
+                    tok = try RFC_2045.Parse.Token<Input>().parse(&input)
+                } catch {
                     break
                 }
                 value = tok
