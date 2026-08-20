@@ -1,14 +1,14 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
 import PackageDescription
 
 let package = Package(
     name: "swift-rfc-2183",
     platforms: [
-        .macOS("27"),
-        .iOS("27"),
-        .tvOS("27"),
-        .watchOS("27")
+        .macOS(.v27),
+        .iOS(.v27),
+        .tvOS(.v27),
+        .watchOS(.v27),
     ],
     products: [
         .library(
@@ -17,33 +17,57 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-primitives/swift-ascii-serializer-primitives.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-primitives/swift-ascii-serializer-primitives.git",
+            branch: "main"
+        ),
         .package(url: "https://github.com/swift-incits/swift-incits-4-1986.git", branch: "main"),
         .package(url: "https://github.com/swift-ietf/swift-rfc-2045.git", branch: "main"),
         .package(url: "https://github.com/swift-ietf/swift-rfc-5322.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-binary-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-binary-serializer-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-parser-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-ascii-parser-primitives.git", branch: "main")
+        .package(
+            url: "https://github.com/swift-primitives/swift-binary-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-binary-serializer-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-parser-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-ascii-parser-primitives.git",
+            branch: "main"
+        ),
     ],
     targets: [
         .target(
             name: "RFC 2183",
             dependencies: [
-                .product(name: "ASCII Serializer Primitives", package: "swift-ascii-serializer-primitives"),
+                .product(
+                    name: "ASCII Serializer Primitives",
+                    package: "swift-ascii-serializer-primitives"
+                ),
                 .product(name: "INCITS 4 1986", package: "swift-incits-4-1986"),
                 .product(name: "RFC 2045", package: "swift-rfc-2045"),
                 .product(name: "RFC 5322", package: "swift-rfc-5322"),
                 .product(name: "Binary Primitives", package: "swift-binary-primitives"),
-                .product(name: "Binary Serializable Primitives", package: "swift-binary-serializer-primitives"),
+                .product(
+                    name: "Binary Serializable Primitives",
+                    package: "swift-binary-serializer-primitives"
+                ),
                 .product(name: "Parser Primitives", package: "swift-parser-primitives"),
-                .product(name: "Parseable ASCII Primitives", package: "swift-ascii-parser-primitives")
+                .product(
+                    name: "Parseable ASCII Primitives",
+                    package: "swift-ascii-parser-primitives"
+                ),
             ]
         ),
         .testTarget(
             name: "RFC 2183 Tests",
             dependencies: [
-                "RFC 2183",
+                "RFC 2183"
             ]
         ),
     ],
