@@ -6,8 +6,6 @@ import Testing
 @Suite
 struct `Content-Disposition Tests` {
 
-    // MARK: - Basic Parsing Tests
-
     @Test
     func `Parse inline disposition`() throws {
         let disposition = try RFC_2183.ContentDisposition("inline")
@@ -48,8 +46,6 @@ struct `Content-Disposition Tests` {
         #expect(disposition.filename?.value == "photo.jpg")
     }
 
-    // MARK: - Parameter Tests
-
     @Test
     func `Parse size parameter`() throws {
         let disposition = try RFC_2183.ContentDisposition(
@@ -67,8 +63,6 @@ struct `Content-Disposition Tests` {
         #expect(disposition.filename?.value == "doc.pdf")
         #expect(disposition.creationDate != nil)
     }
-
-    // MARK: - Escaping Tests
 
     @Test
     func `Parse filename with escaped quotes`() throws {
@@ -94,8 +88,6 @@ struct `Content-Disposition Tests` {
         )
         #expect(disposition.filename?.value == "my document.pdf")
     }
-
-    // MARK: - Convenience Constructor Tests
 
     @Test
     func `Create inline using convenience`() {
@@ -125,8 +117,6 @@ struct `Content-Disposition Tests` {
         #expect(disposition.filename?.value == "photo.jpg")
     }
 
-    // MARK: - String Literal Tests
-
     @Test
     func `Create from string`() throws {
         let disposition = try RFC_2183.ContentDisposition(#"attachment; filename="test.txt""#)
@@ -139,8 +129,6 @@ struct `Content-Disposition Tests` {
         let type: RFC_2183.DispositionType = "inline"
         #expect(type == .inline)
     }
-
-    // MARK: - Roundtrip Tests
 
     @Test
     func `Roundtrip parse and render - simple`() throws {
@@ -156,8 +144,6 @@ struct `Content-Disposition Tests` {
         #expect(String(disposition) == original)
     }
 
-    // MARK: - Custom Disposition Types
-
     @Test
     func `Custom disposition type`() throws {
         let disposition = try RFC_2183.ContentDisposition("x-custom; param=value")
@@ -168,12 +154,10 @@ struct `Content-Disposition Tests` {
         )
     }
 
-    // MARK: - Edge Cases
-
     @Test
     func `Empty filename parameter`() throws {
         let disposition = try RFC_2183.ContentDisposition("attachment; filename=\"\"")
-        // Empty filename fails validation, so it should be nil
+
         #expect(disposition.filename == nil)
     }
 

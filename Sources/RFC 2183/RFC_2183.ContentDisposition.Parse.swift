@@ -1,23 +1,8 @@
-//
-//  RFC_2183.ContentDisposition.Parse.swift
-//  swift-rfc-2183
-//
-//  Content-Disposition: disposition-type *(";" parameter)
-//
-
 public import Parser_Primitives
 public import RFC_2045
 
 extension RFC_2183.ContentDisposition {
-    /// Parses a Content-Disposition header per RFC 2183 Section 2.
-    ///
-    /// `disposition = disposition-type *(";" disposition-parm)`
-    ///
-    /// Where `disposition-parm = token "=" (token / quoted-string)`
-    ///
-    /// Returns the disposition type and parameters as raw byte slices.
-    /// Reuses `RFC_2045.Parse.Token` and `RFC_2045.Parse.QuotedString`
-    /// since MIME parameter syntax is shared.
+
     public struct Parse<Input: Collection.Slice.`Protocol`>: Sendable
     where Input: Sendable, Input.Element == UInt8 {
         @inlinable
@@ -58,7 +43,7 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
 
     @inlinable
     public func parse(_ input: inout Input) throws(Failure) -> Output {
-        // Parse disposition type (token)
+
         let dispositionType: Input
         do throws(RFC_2045.Parse.Token<Input>.Error) {
             dispositionType = try RFC_2045.Parse.Token<Input>().parse(&input)
@@ -66,14 +51,12 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
             throw .expectedToken
         }
 
-        // Parse optional parameters: *(";" OWS token "=" (token / quoted-string))
         var parameters: [Parameter] = []
 
         while input.startIndex < input.endIndex {
-            // Skip OWS
+
             Self._skipOWS(&input)
 
-            // Expect ';'
             guard input.startIndex < input.endIndex,
                 input[input.startIndex] == 0x3B
             else {
@@ -81,10 +64,8 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
             }
             input = input[input.index(after: input.startIndex)...]
 
-            // Skip OWS
             Self._skipOWS(&input)
 
-            // Parse parameter name (token)
             let name: Input
             do throws(RFC_2045.Parse.Token<Input>.Error) {
                 name = try RFC_2045.Parse.Token<Input>().parse(&input)
@@ -92,7 +73,6 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
                 break
             }
 
-            // Expect '='
             guard input.startIndex < input.endIndex,
                 input[input.startIndex] == 0x3D
             else {
@@ -100,7 +80,6 @@ extension RFC_2183.ContentDisposition.Parse: Parser.`Protocol` {
             }
             input = input[input.index(after: input.startIndex)...]
 
-            // Parse value (token or quoted-string)
             let value: Input
             if input.startIndex < input.endIndex && input[input.startIndex] == 0x22 {
                 let qs: Input
