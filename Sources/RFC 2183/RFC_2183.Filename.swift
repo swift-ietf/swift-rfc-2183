@@ -1,31 +1,28 @@
-public import ASCII_Serializer
-public import Binary_Serializable
-import INCITS_4_1986
-public import Parseable_ASCII
-
-private typealias Code = ASCII.Code
+public import Byte
+import ASCII
+import Byte
 
 extension RFC_2183 {
 
-    public struct Filename: Hashable, Sendable, Codable {
+    public struct Filename: Hashable, Sendable {
 
-        public let value: String
+        public let rawValue: String
 
-        init(__unchecked value: String) {
-            self.value = value
+        public init(
+            __unchecked: (),
+            rawValue: String
+        ) {
+            self.rawValue = rawValue
         }
     }
 }
 
 extension RFC_2183.Filename {
 
-    public var baseName: String {
-        value
-    }
+    public var value: String { rawValue }
 }
 
-extension RFC_2183.Filename: Swift.RawRepresentable, ASCII.Serializable, Binary.Serializable {
-    public var rawValue: String { value }
+extension RFC_2183.Filename: Swift.RawRepresentable {
 
     public init?(rawValue: String) {
         do throws(RFC_2183.Filename.Error) {
@@ -34,34 +31,20 @@ extension RFC_2183.Filename: Swift.RawRepresentable, ASCII.Serializable, Binary.
             return nil
         }
     }
-
-    public static func serialize<Buffer: RangeReplaceableCollection>(
-        _ value: Self,
-        into buffer: inout Buffer
-    ) where Buffer.Element == ASCII.Code {
-        for byte in value.rawValue.utf8 { buffer.append(ASCII.Code(byte)) }
-    }
-
-    public static func serialize<Buffer: RangeReplaceableCollection>(
-        _ value: Self,
-        into buffer: inout Buffer
-    ) where Buffer.Element == Byte {
-        for byte in value.rawValue.utf8 { buffer.append(Byte(byte)) }
-    }
 }
 
 extension RFC_2183.Filename: CustomStringConvertible {
 
-    public var description: String { value }
+    public var description: String { rawValue }
 }
 
-extension RFC_2183.Filename: ASCII.Parseable {
+extension RFC_2183.Filename {
 
     public init(_ string: some StringProtocol) throws(Error) {
-        try self.init(ascii: [Byte](string.utf8))
+        try self.init(ascii: string.utf8.map(Byte.init(bitPattern:)))
     }
 
-    public init<Bytes: Collection>(ascii bytes: Bytes) throws(Error)
+    public init<Bytes: Swift.Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
 
         guard !bytes.isEmpty else {
@@ -76,8 +59,7 @@ extension RFC_2183.Filename: ASCII.Parseable {
             } catch {
                 throw Error.notASCII(String(decoding: bytes, as: UTF8.self))
             }
-            guard code.isVisible || code == Code.space else {
-
+            guard code.isVisible || code == ASCII.Code.space else {
                 throw Error.containsControlCharacters(
                     String(decoding: bytes, as: UTF8.self),
                     byte: code
@@ -99,13 +81,6 @@ extension RFC_2183.Filename: ASCII.Parseable {
             throw Error.isAbsolutePath(value)
         }
 
-        self.init(__unchecked: value)
-    }
-}
-
-extension [Byte] {
-
-    public init(_ filename: RFC_2183.Filename) {
-        self = [Byte](filename.value.utf8)
+        self.init(__unchecked: (), rawValue: value)
     }
 }

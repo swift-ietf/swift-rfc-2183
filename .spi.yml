@@ -3,3 +3,4 @@ builder:
   configs:
   - documentation_targets:
     - RFC 2183
+    - RFC 2183 Foundation Integration

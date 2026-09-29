@@ -9,35 +9,29 @@ let package = Package(
         .iOS(.v27),
         .tvOS(.v27),
         .watchOS(.v27),
+        .visionOS(.v27),
     ],
     products: [
         .library(
             name: "RFC 2183",
             targets: ["RFC 2183"]
-        )
+        ),
+        .library(
+            name: "RFC 2183 Foundation Integration",
+            targets: ["RFC 2183 Foundation Integration"]
+        ),
     ],
     dependencies: [
         .package(
-            url: "https://github.com/swift-molecules/swift-ascii-serializer.git",
-            branch: "main"
-        ),
-        .package(url: "https://github.com/swift-incits/swift-incits-4-1986.git", branch: "main"),
-        .package(url: "https://github.com/swift-ietf/swift-rfc-2045.git", branch: "main"),
-        .package(url: "https://github.com/swift-ietf/swift-rfc-5322.git", branch: "main"),
-        .package(
-            url: "https://github.com/swift-molecules/swift-binary.git",
+            url: "https://github.com/swift-atoms/swift-ascii.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-binary-serializer.git",
+            url: "https://github.com/swift-atoms/swift-byte.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-molecules/swift-parser.git",
-            branch: "main"
-        ),
-        .package(
-            url: "https://github.com/swift-molecules/swift-ascii-parser.git",
+            url: "https://github.com/swift-ietf/swift-rfc-5322.git",
             branch: "main"
         ),
     ],
@@ -45,29 +39,43 @@ let package = Package(
         .target(
             name: "RFC 2183",
             dependencies: [
-                .product(
-                    name: "ASCII Serializer",
-                    package: "swift-ascii-serializer"
-                ),
-                .product(name: "INCITS 4 1986", package: "swift-incits-4-1986"),
-                .product(name: "RFC 2045", package: "swift-rfc-2045"),
+                .product(name: "ASCII", package: "swift-ascii"),
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Byte", package: "swift-byte"),
                 .product(name: "RFC 5322", package: "swift-rfc-5322"),
-                .product(name: "Binary", package: "swift-binary"),
+            ]
+        ),
+        .target(
+            name: "RFC 2183 Foundation Integration",
+            dependencies: [
+                .target(name: "RFC 2183"),
+                .product(name: "RFC 5322", package: "swift-rfc-5322"),
                 .product(
-                    name: "Binary Serializable",
-                    package: "swift-binary-serializer"
-                ),
-                .product(name: "Parser", package: "swift-parser"),
-                .product(
-                    name: "Parseable ASCII",
-                    package: "swift-ascii-parser"
+                    name: "RFC 5322 Foundation Integration",
+                    package: "swift-rfc-5322"
                 ),
             ]
         ),
         .testTarget(
             name: "RFC 2183 Tests",
             dependencies: [
-                .target(name: "RFC 2183")
+                .target(name: "RFC 2183"),
+                .product(name: "ASCII", package: "swift-ascii"),
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "RFC 5322", package: "swift-rfc-5322"),
+            ]
+        ),
+        .testTarget(
+            name: "RFC 2183 Foundation Integration Tests",
+            dependencies: [
+                .target(name: "RFC 2183"),
+                .target(name: "RFC 2183 Foundation Integration"),
+                .product(name: "RFC 5322", package: "swift-rfc-5322"),
+                .product(
+                    name: "RFC 5322 Foundation Integration",
+                    package: "swift-rfc-5322"
+                ),
             ]
         ),
     ],
