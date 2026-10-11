@@ -100,11 +100,14 @@ extension RFC_2183.ContentDisposition {
             if let size = raw[RFC_2183.ParameterName.size.rawValue] {
                 parameters.size = try? RFC_2183.Size(size)
             }
-            parameters.name = raw[RFC_2183.ParameterName.name.rawValue]
+            if let name = raw[RFC_2183.ParameterName.name.rawValue] {
+                parameters.name = try? RFC_2183.ParameterValue(name)
+            }
 
             for (key, value) in raw {
                 guard let name = RFC_2183.ParameterName(rawValue: key) else { continue }
                 guard !known.contains(name) else { continue }
+                guard let value = try? RFC_2183.ParameterValue(value) else { continue }
                 parameters.extensionParameters[name] = value
             }
 

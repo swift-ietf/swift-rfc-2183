@@ -36,8 +36,8 @@ struct `RFC_2183+Codable Tests` {
                 filename: try RFC_2183.Filename("report.pdf"),
                 creationDate: try RFC_5322.DateTime("Mon, 1 Jan 2024 12:00:00 +0000"),
                 size: try RFC_2183.Size(bytes: 1024),
-                name: "document",
-                extensionParameters: [try RFC_2183.ParameterName("x-token"): "abc"]
+                name: try RFC_2183.ParameterValue("document"),
+                extensionParameters: [try RFC_2183.ParameterName("x-token"): try RFC_2183.ParameterValue("abc")]
             )
         )
 
@@ -60,6 +60,13 @@ struct `RFC_2183+Codable Tests` {
     func `an invalid filename fails to decode`() {
         #expect(throws: RFC_2183.Filename.Error.self) {
             try JSONDecoder().decode(RFC_2183.Filename.self, from: Data(#""../x""#.utf8))
+        }
+    }
+
+    @Test
+    func `RFC 2183 §2 and RFC 2045 §5.1: a parameter value carrying CR LF fails to decode`() {
+        #expect(throws: RFC_2183.ParameterValue.Error.self) {
+            try JSONDecoder().decode(RFC_2183.ParameterValue.self, from: Data(#""a\r\nb""#.utf8))
         }
     }
 }

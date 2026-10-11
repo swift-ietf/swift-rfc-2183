@@ -32,7 +32,7 @@ struct `RFC_2183.ContentDisposition Tests` {
         #expect(
             try RFC_2183.ContentDisposition(#"form-data; name="avatar"; filename="photo.jpg""#)
                 == .formData(
-                    name: "avatar",
+                    name: try RFC_2183.ParameterValue("avatar"),
                     filename: try RFC_2183.Filename("photo.jpg")
                 )
         )
@@ -45,7 +45,7 @@ struct `RFC_2183.ContentDisposition Tests` {
             type: .attachment,
             parameters: .init(
                 creationDate: date,
-                extensionParameters: [try RFC_2183.ParameterName("x-token"): "abc"]
+                extensionParameters: [try RFC_2183.ParameterName("x-token"): try RFC_2183.ParameterValue("abc")]
             )
         )
 
@@ -53,7 +53,7 @@ struct `RFC_2183.ContentDisposition Tests` {
         #expect(
             disposition.parameters.extensionParameters[
                 try RFC_2183.ParameterName("X-Token")
-            ] == "abc"
+            ]?.value == "abc"
         )
     }
 
@@ -92,7 +92,7 @@ struct `RFC_2183.ContentDisposition from text` {
         )
 
         #expect(disposition.type == .formData)
-        #expect(disposition.name == "avatar")
+        #expect(disposition.name?.value == "avatar")
         #expect(disposition.filename?.value == "photo.jpg")
     }
 
@@ -133,7 +133,7 @@ struct `RFC_2183.ContentDisposition from text` {
     func `unknown parameters land in the extension parameters`() throws {
         let disposition = try RFC_2183.ContentDisposition("inline; x-token=abc")
 
-        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")] == "abc")
+        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")]?.value == "abc")
     }
 
     @Test
@@ -141,6 +141,21 @@ struct `RFC_2183.ContentDisposition from text` {
         let disposition = try RFC_2183.ContentDisposition(#"attachment; filename="../etc/passwd""#)
 
         #expect(disposition.filename == nil)
+    }
+
+    @Test
+    func `RFC 2183 §2 and RFC 2045 §5.1: a name carrying CR or LF is dropped rather than accepted`() throws {
+        let disposition = try RFC_2183.ContentDisposition("form-data; name=\"a\r\nX-Injected: 1\"")
+
+        #expect(disposition.name == nil)
+    }
+
+    @Test
+    func `RFC 2183 §2 and RFC 2045 §5.1: an extension value carrying a control byte is dropped rather than accepted`() throws {
+        let disposition = try RFC_2183.ContentDisposition("inline; x-token=\"a\u{1}b\"; x-other=ok")
+
+        #expect(disposition.parameters.extensionParameters.count == 1)
+        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")] == nil)
     }
 
     @Test
@@ -162,7 +177,7 @@ struct `RFC_2183.ContentDisposition from text` {
         let disposition = try RFC_2183.ContentDisposition("inline; x token=abc; x-token=def")
 
         #expect(disposition.parameters.extensionParameters.count == 1)
-        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")] == "def")
+        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")]?.value == "def")
     }
 
     @Test

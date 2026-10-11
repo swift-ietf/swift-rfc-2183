@@ -14,9 +14,9 @@ extension RFC_2183 {
 
         public var size: Size?
 
-        public var name: String?
+        public var name: ParameterValue?
 
-        public var extensionParameters: [ParameterName: String]
+        public var extensionParameters: [ParameterName: ParameterValue]
 
         public init(
             filename: Filename? = nil,
@@ -24,8 +24,8 @@ extension RFC_2183 {
             modificationDate: RFC_5322.DateTime? = nil,
             readDate: RFC_5322.DateTime? = nil,
             size: Size? = nil,
-            name: String? = nil,
-            extensionParameters: [ParameterName: String] = [:]
+            name: ParameterValue? = nil,
+            extensionParameters: [ParameterName: ParameterValue] = [:]
         ) {
             self.filename = filename
             self.creationDate = creationDate

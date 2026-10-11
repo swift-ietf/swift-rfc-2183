@@ -43,7 +43,7 @@ extension RFC_2183.ContentDisposition {
         parameters.size
     }
 
-    public var name: String? {
+    public var name: RFC_2183.ParameterValue? {
         parameters.name
     }
 }
@@ -111,7 +111,10 @@ extension RFC_2183.ContentDisposition {
         )
     }
 
-    public static func formData(name: String, filename: RFC_2183.Filename? = nil) -> Self {
+    public static func formData(
+        name: RFC_2183.ParameterValue,
+        filename: RFC_2183.Filename? = nil
+    ) -> Self {
         Self(
             type: .formData,
             parameters: .init(

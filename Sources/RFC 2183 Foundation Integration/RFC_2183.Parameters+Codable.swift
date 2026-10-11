@@ -17,10 +17,10 @@ extension RFC_2183.Parameters: Encodable, Decodable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        var extensionParameters: [RFC_2183.ParameterName: String] = [:]
+        var extensionParameters: [RFC_2183.ParameterName: RFC_2183.ParameterValue] = [:]
         let raw = try container.decodeIfPresent([String: String].self, forKey: .extensionParameters)
         for (key, value) in raw ?? [:] {
-            extensionParameters[try RFC_2183.ParameterName(key)] = value
+            extensionParameters[try RFC_2183.ParameterName(key)] = try RFC_2183.ParameterValue(value)
         }
 
         self.init(
@@ -35,7 +35,7 @@ extension RFC_2183.Parameters: Encodable, Decodable {
             ),
             readDate: try container.decodeIfPresent(RFC_5322.DateTime.self, forKey: .readDate),
             size: try container.decodeIfPresent(RFC_2183.Size.self, forKey: .size),
-            name: try container.decodeIfPresent(String.self, forKey: .name),
+            name: try container.decodeIfPresent(RFC_2183.ParameterValue.self, forKey: .name),
             extensionParameters: extensionParameters
         )
     }
@@ -52,7 +52,7 @@ extension RFC_2183.Parameters: Encodable, Decodable {
         if !extensionParameters.isEmpty {
             var raw: [String: String] = [:]
             for (key, value) in extensionParameters {
-                raw[key.rawValue] = value
+                raw[key.rawValue] = value.rawValue
             }
             try container.encode(raw, forKey: .extensionParameters)
         }
