@@ -1,7 +1,6 @@
 public import Byte
 public import RFC_5322
 import ASCII
-import Byte
 
 extension RFC_2183 {
 
@@ -54,7 +53,7 @@ extension RFC_2183.ContentDisposition {
         try self.init(ascii: string.utf8.map(Byte.init(bitPattern:)))
     }
 
-    public init<Bytes: Swift.Collection>(ascii bytes: Bytes) throws(Error)
+    public init<Bytes: Swift::Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
 
         for byte in bytes {

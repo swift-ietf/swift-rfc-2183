@@ -1,5 +1,4 @@
 public import Byte
-import Byte
 
 extension RFC_2183 {
 
@@ -27,7 +26,7 @@ extension RFC_2183.DispositionType: Hashable {
     }
 }
 
-extension RFC_2183.DispositionType: Swift.RawRepresentable {
+extension RFC_2183.DispositionType: Swift::RawRepresentable {
 
     public init?(rawValue: String) {
         do throws(Error) {
@@ -51,7 +50,7 @@ extension RFC_2183.DispositionType {
         try self.init(ascii: string.utf8.map(Byte.init(bitPattern:)))
     }
 
-    public init<Bytes: Swift.Collection>(ascii bytes: Bytes) throws(Error)
+    public init<Bytes: Swift::Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
 
         switch RFC_2183.Token.validate(bytes) {

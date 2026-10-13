@@ -14,7 +14,7 @@ extension RFC_2183 {
             case invalidCharacter(ASCII.Code)
         }
 
-        static func validate<Bytes: Swift.Collection>(_ bytes: Bytes) -> Failure?
+        static func validate<Bytes: Swift::Collection>(_ bytes: Bytes) -> Failure?
         where Bytes.Element == Byte {
 
             guard !bytes.isEmpty else {

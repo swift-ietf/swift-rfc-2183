@@ -1,6 +1,5 @@
 public import Byte
 import ASCII
-import Byte
 
 extension RFC_2183 {
 
@@ -34,7 +33,7 @@ extension RFC_2183.Size {
         try self.init(ascii: string.utf8.map(Byte.init(bitPattern:)))
     }
 
-    public init<Bytes: Swift.Collection>(ascii bytes: Bytes) throws(Error)
+    public init<Bytes: Swift::Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
         let string = String(decoding: bytes, as: UTF8.self)
         for byte in bytes {

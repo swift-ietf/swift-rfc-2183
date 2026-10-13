@@ -1,6 +1,5 @@
 public import Byte
 import ASCII
-import Byte
 
 extension RFC_2183 {
 
@@ -22,7 +21,7 @@ extension RFC_2183.Filename {
     public var value: String { rawValue }
 }
 
-extension RFC_2183.Filename: Swift.RawRepresentable {
+extension RFC_2183.Filename: Swift::RawRepresentable {
 
     public init?(rawValue: String) {
         do throws(RFC_2183.Filename.Error) {
@@ -44,7 +43,7 @@ extension RFC_2183.Filename {
         try self.init(ascii: string.utf8.map(Byte.init(bitPattern:)))
     }
 
-    public init<Bytes: Swift.Collection>(ascii bytes: Bytes) throws(Error)
+    public init<Bytes: Swift::Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
 
         guard !bytes.isEmpty else {
