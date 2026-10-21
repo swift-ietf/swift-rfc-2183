@@ -1,6 +1,6 @@
+import ASCII
 public import Byte
 public import RFC_5322
-import ASCII
 
 extension RFC_2183 {
 
