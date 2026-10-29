@@ -42,8 +42,15 @@ let package = Package(
         .package(
             url: "https://github.com/swift-atoms/swift-parser.git",
             branch: "main",
-            traits: ["Append", "IteratorLeaves", "Map", "Product", "Skip", "Either", "Iterator"]
-                .map { .trait(name: $0, condition: .when(traits: ["Coder"])) }
+            traits: [
+                .trait(name: "Append", condition: .when(traits: ["Coder"])),
+                .trait(name: "IteratorLeaves", condition: .when(traits: ["Coder"])),
+                .trait(name: "Map", condition: .when(traits: ["Coder"])),
+                .trait(name: "Product", condition: .when(traits: ["Coder"])),
+                .trait(name: "Skip", condition: .when(traits: ["Coder"])),
+                .trait(name: "Either", condition: .when(traits: ["Coder"])),
+                .trait(name: "Iterator", condition: .when(traits: ["Coder"])),
+            ]
         ),
         .package(url: "https://github.com/swift-atoms/swift-serializer.git", branch: "main"),
         .package(
