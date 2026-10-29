@@ -2,9 +2,9 @@
     public import ASCII
     public import Binary
 
-    extension RFC_2183.Size: @retroactive ASCII.Parseable {}
+    extension RFC_2183.Size: ASCII.Parseable {}
 
-    extension RFC_2183.Size: @retroactive Swift::RawRepresentable {
+    extension RFC_2183.Size: Swift::RawRepresentable {
 
         public var rawValue: String { String(bytes) }
 
@@ -17,10 +17,10 @@
         }
     }
 
-    extension RFC_2183.Size: @retroactive CustomStringConvertible {
+    extension RFC_2183.Size: CustomStringConvertible {
 
         public var description: String { rawValue }
     }
 
-    extension RFC_2183.Size: @retroactive ASCII.Serializable, @retroactive Binary.Serializable {}
+    extension RFC_2183.Size: ASCII.Serializable, Binary.Serializable {}
 #endif

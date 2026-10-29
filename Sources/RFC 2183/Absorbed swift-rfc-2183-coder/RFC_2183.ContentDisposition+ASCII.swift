@@ -3,10 +3,10 @@
     public import Binary
     public import Byte
 
-    extension RFC_2183.ContentDisposition: @retroactive ASCII.Parseable {}
+    extension RFC_2183.ContentDisposition: ASCII.Parseable {}
 
-    extension RFC_2183.ContentDisposition: @retroactive ASCII.Serializable,
-        @retroactive Binary.Serializable
+    extension RFC_2183.ContentDisposition: ASCII.Serializable,
+        Binary.Serializable
     {
 
         public static func serialize<Buffer: RangeReplaceableCollection>(
@@ -24,7 +24,7 @@
         }
     }
 
-    extension RFC_2183.ContentDisposition: @retroactive CustomStringConvertible {
+    extension RFC_2183.ContentDisposition: CustomStringConvertible {
 
         public var description: String { Text.render(self) }
     }

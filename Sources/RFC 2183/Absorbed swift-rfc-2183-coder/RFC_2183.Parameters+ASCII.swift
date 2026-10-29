@@ -3,8 +3,8 @@
     public import Binary
     public import Byte
 
-    extension RFC_2183.Parameters: @retroactive ASCII.Serializable,
-        @retroactive Binary.Serializable
+    extension RFC_2183.Parameters: ASCII.Serializable,
+        Binary.Serializable
     {
 
         public static func serialize<Buffer: RangeReplaceableCollection>(
