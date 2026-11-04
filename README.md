@@ -1,20 +1,16 @@
 # swift-rfc-2183
 
-Domain model for RFC 2183, the Content-Disposition header field: `RFC_2183.ContentDisposition` with its `DispositionType` (`inline`, `attachment`, the RFC 7578 `form-data` extension and any other token) and `Parameters` (`Filename`, `Size`, the RFC 5322 creation, modification and read dates, the `form-data` field `name`, and extension parameters keyed by `ParameterName`, with `name` and extension values as `ParameterValue`), plus the `RFC_5322.Header.Name.contentDisposition` field name. `ContentDisposition`, `DispositionType`, `ParameterName`, `ParameterValue`, `Filename` and `Size` validate on construction and read their RFC text form through `init(_:)` / `init(ascii:)`; the `RFC 2183 Foundation Integration` product bridges every type to `Codable`. Byte-level serialization and the rendered text forms (`ASCII.Parseable`, `ASCII.Serializable`, `Binary.Serializable`, `ContentDisposition.description`, the nested `Coder` types and the `RFC_5322.Header` construction) live in [swift-rfc-2183-coder](https://github.com/swift-ietf/swift-rfc-2183-coder).
+Use this package when you read or write a `Content-Disposition` header field, for a MIME attachment, an inline part or a form field. Start from `RFC_2183.ContentDisposition`. Parameter values here are US-ASCII only. For non-ASCII filenames encoded with RFC 2231, use swift-rfc-2231. For whole multipart/form-data bodies, use swift-rfc-7578. For `Codable`, add the `RFC 2183 Foundation Integration` product.
 
-```swift
-import RFC_2183
+## Laws
 
-let attachment = RFC_2183.ContentDisposition.attachment(
-    filename: try RFC_2183.Filename("report.pdf"),
-    size: try RFC_2183.Size(bytes: 1_048_576)
-)
-attachment.filename?.value                                   // "report.pdf"
-attachment.size?.bytes                                       // 1048576
-
-let upload = try RFC_2183.ContentDisposition(#"form-data; name="avatar"; filename="photo.jpg""#)
-upload.type == .formData                                     // true
-upload.name?.value                                           // "avatar"
-
-try RFC_2183.Filename("../etc/passwd")                       // throws Filename.Error.containsPathTraversal
-```
+- Reading a header fails only when the input is not ASCII or the disposition type is empty or not a token. A parameter whose name is not a token, or whose value fails validation, is dropped and the rest of the header is kept. A filename such as `../etc/passwd` or a name that carries CR LF comes back as nil rather than as an error.
+- Disposition types and parameter names compare without regard to case and keep the case they were written in. `ATTACHMENT` equals `RFC_2183.DispositionType.attachment`.
+- A semicolon inside a quoted value does not end the parameter, and a backslash escape inside quotes is undone, so `"file\"with\"quotes.txt"` reads as the filename with plain quotes.
+- A parameter that is not one of the six RFC 2183 parameters goes into `RFC_2183.Parameters.extensionParameters`.
+- `RFC_2183.Filename` refuses any value containing `..`, `/` or `\`, as well as control characters. Spaces are allowed.
+- `RFC_2183.ParameterValue` accepts printable ASCII and space, and the empty string. Tab, CR, LF, DEL and every other control byte are refused.
+- `RFC_2183.Size` text is one or more decimal digits and nothing else: no sign, no spaces.
+- Written out, parameters always come in the same order: `filename`, `creation-date`, `modification-date`, `read-date`, `size`, `name`, then extension parameters sorted by name. Every value is quoted except `size`, with `"` and `\` escaped by a backslash.
+- The coders read only their own part and leave the rest of the input. `RFC_2183.ContentDisposition.coder` stops at CR or LF. When parsing fails, the cursor goes back to where it started.
+- With the Foundation integration, a disposition type, filename, parameter name and parameter value each encode as a string, and a size as an integer. Decoding validates them the same way the initializers do.
