@@ -2,7 +2,9 @@
     import RFC_5322
 
     enum Text {
+    }
 
+    extension Text {
         static func quoted(_ value: String) -> String {
             var result = "\""
             for character in value {
