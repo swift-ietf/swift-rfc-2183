@@ -62,127 +62,129 @@ struct `RFC_2183.ContentDisposition Tests` {
     }
 }
 
-@Suite
-struct `RFC_2183.ContentDisposition from text` {
+extension `RFC_2183.ContentDisposition Tests` {
+    @Suite
+    struct `RFC_2183.ContentDisposition from text` {
 
-    @Test
-    func `reads a bare disposition type`() throws {
-        let disposition = try RFC_2183.ContentDisposition("inline")
+        @Test
+        func `reads a bare disposition type`() throws {
+            let disposition = try RFC_2183.ContentDisposition("inline")
 
-        #expect(disposition.type == .inline)
-        #expect(disposition.parameters == RFC_2183.Parameters())
-    }
-
-    @Test
-    func `reads a quoted filename and a size`() throws {
-        let disposition = try RFC_2183.ContentDisposition(
-            #"attachment; filename="report.pdf"; size=1024"#
-        )
-
-        #expect(disposition.type == .attachment)
-        #expect(disposition.filename?.value == "report.pdf")
-        #expect(disposition.size?.bytes == 1024)
-    }
-
-    @Test
-    func `reads over bytes`() throws {
-        let disposition = try RFC_2183.ContentDisposition(
-            ascii: [Byte](utf8: #"form-data; name="avatar"; filename="photo.jpg""#)
-        )
-
-        #expect(disposition.type == .formData)
-        #expect(disposition.name?.value == "avatar")
-        #expect(disposition.filename?.value == "photo.jpg")
-    }
-
-    @Test
-    func `folds the case of the type and parameter names`() throws {
-        let disposition = try RFC_2183.ContentDisposition(#"ATTACHMENT; FILENAME="a.txt""#)
-
-        #expect(disposition.type == .attachment)
-        #expect(disposition.filename?.value == "a.txt")
-    }
-
-    @Test
-    func `a semicolon inside a quoted value does not split the parameter`() throws {
-        let disposition = try RFC_2183.ContentDisposition(#"attachment; filename="a;b.txt""#)
-
-        #expect(disposition.filename?.value == "a;b.txt")
-    }
-
-    @Test
-    func `an escaped quote inside a quoted value is unescaped`() throws {
-        let disposition = try RFC_2183.ContentDisposition(
-            #"attachment; filename="file\"with\"quotes.txt""#
-        )
-
-        #expect(disposition.filename?.value == #"file"with"quotes.txt"#)
-    }
-
-    @Test
-    func `reads the RFC 5322 dates`() throws {
-        let disposition = try RFC_2183.ContentDisposition(
-            #"attachment; creation-date="Wed, 12 Feb 1997 16:29:51 -0500""#
-        )
-
-        #expect(disposition.creationDate == (try RFC_5322.DateTime("Wed, 12 Feb 1997 16:29:51 -0500")))
-    }
-
-    @Test
-    func `unknown parameters land in the extension parameters`() throws {
-        let disposition = try RFC_2183.ContentDisposition("inline; x-token=abc")
-
-        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")]?.value == "abc")
-    }
-
-    @Test
-    func `an unsafe filename is dropped rather than accepted`() throws {
-        let disposition = try RFC_2183.ContentDisposition(#"attachment; filename="../etc/passwd""#)
-
-        #expect(disposition.filename == nil)
-    }
-
-    @Test
-    func `RFC 2183 §2 and RFC 2045 §5.1: a name carrying CR or LF is dropped rather than accepted`() throws {
-        let disposition = try RFC_2183.ContentDisposition("form-data; name=\"a\r\nX-Injected: 1\"")
-
-        #expect(disposition.name == nil)
-    }
-
-    @Test
-    func `RFC 2183 §2 and RFC 2045 §5.1: an extension value carrying a control byte is dropped rather than accepted`() throws {
-        let disposition = try RFC_2183.ContentDisposition("inline; x-token=\"a\u{1}b\"; x-other=ok")
-
-        #expect(disposition.parameters.extensionParameters.count == 1)
-        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")] == nil)
-    }
-
-    @Test
-    func `an empty disposition type is refused`() {
-        #expect(throws: RFC_2183.ContentDisposition.Error.emptyDispositionType) {
-            try RFC_2183.ContentDisposition(#"; filename="x.txt""#)
+            #expect(disposition.type == .inline)
+            #expect(disposition.parameters == RFC_2183.Parameters())
         }
-    }
 
-    @Test
-    func `a disposition type that is not a token is refused`() {
-        #expect(throws: RFC_2183.ContentDisposition.Error.invalidFormat(#"in line; filename="x.txt""#)) {
-            try RFC_2183.ContentDisposition(#"in line; filename="x.txt""#)
+        @Test
+        func `reads a quoted filename and a size`() throws {
+            let disposition = try RFC_2183.ContentDisposition(
+                #"attachment; filename="report.pdf"; size=1024"#
+            )
+
+            #expect(disposition.type == .attachment)
+            #expect(disposition.filename?.value == "report.pdf")
+            #expect(disposition.size?.bytes == 1024)
         }
-    }
 
-    @Test
-    func `a parameter whose name is not a token is skipped`() throws {
-        let disposition = try RFC_2183.ContentDisposition("inline; x token=abc; x-token=def")
+        @Test
+        func `reads over bytes`() throws {
+            let disposition = try RFC_2183.ContentDisposition(
+                ascii: [Byte](utf8: #"form-data; name="avatar"; filename="photo.jpg""#)
+            )
 
-        #expect(disposition.parameters.extensionParameters.count == 1)
-        #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")]?.value == "def")
-    }
+            #expect(disposition.type == .formData)
+            #expect(disposition.name?.value == "avatar")
+            #expect(disposition.filename?.value == "photo.jpg")
+        }
 
-    @Test
-    func `non-ASCII input is refused`() {
-        #expect(throws: RFC_2183.ContentDisposition.Error.invalidFormat("attachment; filename=\"é.txt\"")) {
-            try RFC_2183.ContentDisposition("attachment; filename=\"é.txt\"")
+        @Test
+        func `folds the case of the type and parameter names`() throws {
+            let disposition = try RFC_2183.ContentDisposition(#"ATTACHMENT; FILENAME="a.txt""#)
+
+            #expect(disposition.type == .attachment)
+            #expect(disposition.filename?.value == "a.txt")
+        }
+
+        @Test
+        func `a semicolon inside a quoted value does not split the parameter`() throws {
+            let disposition = try RFC_2183.ContentDisposition(#"attachment; filename="a;b.txt""#)
+
+            #expect(disposition.filename?.value == "a;b.txt")
+        }
+
+        @Test
+        func `an escaped quote inside a quoted value is unescaped`() throws {
+            let disposition = try RFC_2183.ContentDisposition(
+                #"attachment; filename="file\"with\"quotes.txt""#
+            )
+
+            #expect(disposition.filename?.value == #"file"with"quotes.txt"#)
+        }
+
+        @Test
+        func `reads the RFC 5322 dates`() throws {
+            let disposition = try RFC_2183.ContentDisposition(
+                #"attachment; creation-date="Wed, 12 Feb 1997 16:29:51 -0500""#
+            )
+
+            #expect(disposition.creationDate == (try RFC_5322.DateTime("Wed, 12 Feb 1997 16:29:51 -0500")))
+        }
+
+        @Test
+        func `unknown parameters land in the extension parameters`() throws {
+            let disposition = try RFC_2183.ContentDisposition("inline; x-token=abc")
+
+            #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")]?.value == "abc")
+        }
+
+        @Test
+        func `an unsafe filename is dropped rather than accepted`() throws {
+            let disposition = try RFC_2183.ContentDisposition(#"attachment; filename="../etc/passwd""#)
+
+            #expect(disposition.filename == nil)
+        }
+
+        @Test
+        func `RFC 2183 §2 and RFC 2045 §5.1: a name carrying CR or LF is dropped rather than accepted`() throws {
+            let disposition = try RFC_2183.ContentDisposition("form-data; name=\"a\r\nX-Injected: 1\"")
+
+            #expect(disposition.name == nil)
+        }
+
+        @Test
+        func `RFC 2183 §2 and RFC 2045 §5.1: an extension value carrying a control byte is dropped rather than accepted`() throws {
+            let disposition = try RFC_2183.ContentDisposition("inline; x-token=\"a\u{1}b\"; x-other=ok")
+
+            #expect(disposition.parameters.extensionParameters.count == 1)
+            #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")] == nil)
+        }
+
+        @Test
+        func `an empty disposition type is refused`() {
+            #expect(throws: RFC_2183.ContentDisposition.Error.emptyDispositionType) {
+                try RFC_2183.ContentDisposition(#"; filename="x.txt""#)
+            }
+        }
+
+        @Test
+        func `a disposition type that is not a token is refused`() {
+            #expect(throws: RFC_2183.ContentDisposition.Error.invalidFormat(#"in line; filename="x.txt""#)) {
+                try RFC_2183.ContentDisposition(#"in line; filename="x.txt""#)
+            }
+        }
+
+        @Test
+        func `a parameter whose name is not a token is skipped`() throws {
+            let disposition = try RFC_2183.ContentDisposition("inline; x token=abc; x-token=def")
+
+            #expect(disposition.parameters.extensionParameters.count == 1)
+            #expect(disposition.parameters.extensionParameters[try RFC_2183.ParameterName("x-token")]?.value == "def")
+        }
+
+        @Test
+        func `non-ASCII input is refused`() {
+            #expect(throws: RFC_2183.ContentDisposition.Error.invalidFormat("attachment; filename=\"é.txt\"")) {
+                try RFC_2183.ContentDisposition("attachment; filename=\"é.txt\"")
+            }
         }
     }
 }
