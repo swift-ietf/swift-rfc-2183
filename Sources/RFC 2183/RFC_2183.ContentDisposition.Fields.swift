@@ -69,7 +69,7 @@ extension RFC_2183.ContentDisposition {
             return segments
         }
 
-        static func attributes(_ segments: some Sequence<String>) -> [String: String] {
+        static func attributes(_ segments: some Swift.Sequence<String>) -> [String: String] {
             var raw: [String: String] = [:]
             for segment in segments {
                 guard let equals = segment.firstIndex(of: "=") else { continue }
