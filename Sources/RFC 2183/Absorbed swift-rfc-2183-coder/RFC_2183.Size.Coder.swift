@@ -16,7 +16,7 @@
         public static var coder: Coder<ArraySlice<Byte>, [Byte]> { .init() }
     }
 
-extension RFC_2183.Size.Coder {
+    extension RFC_2183.Size.Coder {
         public typealias Output = RFC_2183.Size
 
         public typealias Failure = RFC_2183.Size.Error
@@ -38,5 +38,5 @@ extension RFC_2183.Size.Coder {
         public borrowing func serialize(_ output: Output, into buffer: inout Buffer) throws(Failure) {
             Scan.append(String(output.bytes), into: &buffer)
         }
-}
+    }
 #endif

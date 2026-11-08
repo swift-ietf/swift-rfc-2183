@@ -8,7 +8,6 @@ extension RFC_2183 {
 
 extension RFC_2183.Token {
 
-
     static func validate<Bytes: Swift::Collection>(_ bytes: Bytes) -> Failure?
     where Bytes.Element == Byte {
         guard !bytes.isEmpty else {

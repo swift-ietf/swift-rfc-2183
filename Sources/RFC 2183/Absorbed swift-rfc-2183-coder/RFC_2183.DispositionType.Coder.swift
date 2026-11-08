@@ -16,7 +16,7 @@
         public static var coder: Coder<ArraySlice<Byte>, [Byte]> { .init() }
     }
 
-extension RFC_2183.DispositionType.Coder {
+    extension RFC_2183.DispositionType.Coder {
         public typealias Output = RFC_2183.DispositionType
 
         public typealias Failure = RFC_2183.DispositionType.Error
@@ -35,5 +35,5 @@ extension RFC_2183.DispositionType.Coder {
         public borrowing func serialize(_ output: Output, into buffer: inout Buffer) throws(Failure) {
             Scan.append(output.rawValue, into: &buffer)
         }
-}
+    }
 #endif
