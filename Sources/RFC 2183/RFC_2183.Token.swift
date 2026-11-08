@@ -7,13 +7,7 @@ extension RFC_2183 {
 }
 
 extension RFC_2183.Token {
-    enum Failure {
-        case empty
 
-        case notASCII
-
-        case invalidCharacter(ASCII.Code)
-    }
 
     static func validate<Bytes: Swift::Collection>(_ bytes: Bytes) -> Failure?
     where Bytes.Element == Byte {
