@@ -25,6 +25,7 @@ let package = Package(
         .trait(name: "Coder", description: "Byte-level parsing and serialization of Content-Disposition")
     ],
     dependencies: [
+        .package(url: "https://github.com/swift-ietf/swift-rfc.git", branch: "main"),
         .package(
             url: "https://github.com/swift-atoms/swift-ascii.git",
             branch: "main",
@@ -67,6 +68,7 @@ let package = Package(
         .target(
             name: "RFC 2183",
             dependencies: [
+                .product(name: "IETF RFC", package: "swift-rfc"),
                 .product(name: "ASCII", package: "swift-ascii"),
                 .product(name: "Byte", package: "swift-byte"),
                 .product(name: "RFC 5322", package: "swift-rfc-5322"),

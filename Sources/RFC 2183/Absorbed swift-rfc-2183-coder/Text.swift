@@ -15,11 +15,11 @@
             return result
         }
 
-        static func render(_ disposition: RFC_2183.ContentDisposition) -> String {
+        static func render(_ disposition: IETF.RFC.`2183`.ContentDisposition) -> String {
             disposition.type.rawValue + render(disposition.parameters)
         }
 
-        static func render(_ parameters: RFC_2183.Parameters) -> String {
+        static func render(_ parameters: IETF.RFC.`2183`.Parameters) -> String {
             var result = ""
 
             if let filename = parameters.filename {
