@@ -16,7 +16,7 @@
         }
 
         static func render(_ disposition: IETF.RFC.`2183`.ContentDisposition) -> String {
-            disposition.type.rawValue + render(disposition.parameters)
+            disposition.type.description + render(disposition.parameters)
         }
 
         static func render(_ parameters: IETF.RFC.`2183`.Parameters) -> String {
@@ -41,9 +41,9 @@
                 result += "; name=" + quoted(name.value)
             }
             for (key, value) in parameters.extensionParameters.sorted(by: {
-                $0.key.rawValue < $1.key.rawValue
+                $0.key.description < $1.key.description
             }) {
-                result += "; " + key.rawValue + "=" + quoted(value.value)
+                result += "; " + key.description + "=" + quoted(value.value)
             }
 
             return result

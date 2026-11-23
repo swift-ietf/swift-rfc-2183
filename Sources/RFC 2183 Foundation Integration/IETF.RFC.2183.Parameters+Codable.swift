@@ -52,7 +52,7 @@ extension IETF.RFC.`2183`.Parameters: Encodable, Decodable {
         if !extensionParameters.isEmpty {
             var raw: [String: String] = [:]
             for (key, value) in extensionParameters {
-                raw[key.rawValue] = value.rawValue
+                raw[key.description] = value.value
             }
             try container.encode(raw, forKey: .extensionParameters)
         }

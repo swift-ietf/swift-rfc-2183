@@ -87,22 +87,22 @@ extension IETF.RFC.`2183`.ContentDisposition.Fields {
     static func parameters(_ raw: [String: String]) -> IETF.RFC.`2183`.Parameters {
         var parameters = IETF.RFC.`2183`.Parameters()
 
-        if let filename = raw[IETF.RFC.`2183`.ParameterName.filename.rawValue] {
+        if let filename = raw[IETF.RFC.`2183`.ParameterName.filename.description] {
             parameters.filename = try? IETF.RFC.`2183`.Filename(filename)
         }
-        if let creationDate = raw[IETF.RFC.`2183`.ParameterName.creationDate.rawValue] {
+        if let creationDate = raw[IETF.RFC.`2183`.ParameterName.creationDate.description] {
             parameters.creationDate = try? IETF.RFC.`5322`.DateTime(creationDate)
         }
-        if let modificationDate = raw[IETF.RFC.`2183`.ParameterName.modificationDate.rawValue] {
+        if let modificationDate = raw[IETF.RFC.`2183`.ParameterName.modificationDate.description] {
             parameters.modificationDate = try? IETF.RFC.`5322`.DateTime(modificationDate)
         }
-        if let readDate = raw[IETF.RFC.`2183`.ParameterName.readDate.rawValue] {
+        if let readDate = raw[IETF.RFC.`2183`.ParameterName.readDate.description] {
             parameters.readDate = try? IETF.RFC.`5322`.DateTime(readDate)
         }
-        if let size = raw[IETF.RFC.`2183`.ParameterName.size.rawValue] {
+        if let size = raw[IETF.RFC.`2183`.ParameterName.size.description] {
             parameters.size = try? IETF.RFC.`2183`.Size(size)
         }
-        if let name = raw[IETF.RFC.`2183`.ParameterName.name.rawValue] {
+        if let name = raw[IETF.RFC.`2183`.ParameterName.name.description] {
             parameters.name = try? IETF.RFC.`2183`.ParameterValue(name)
         }
 
